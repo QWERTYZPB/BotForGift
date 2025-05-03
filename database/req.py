@@ -1,28 +1,11 @@
 from models import User, Ticket, Channel, Event, async_session
 from sqlalchemy import select, update, delete
+from sqlalchemy.orm import selectinload
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from typing import Optional, List
 import asyncio, datetime
 
-
-
-
-
-# async def add_user(**data) -> Optional[User]:
-#     try:
-#         async with async_session() as session:
-#             user = User(**data)
-#             session.add(user)
-#             await session.commit()
-#             return user
-#     except IntegrityError:
-#         await session.rollback()
-#         return await update_user(user_id=data['id'], **data)
-#     except Exception as e:
-#         print(f"Error adding user: {e}")
-#         await session.rollback()
-#         return None
 
 
 async def add_user(
@@ -82,17 +65,13 @@ async def add_user(
 
 
 
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from sqlalchemy import select, update, delete
-from typing import List, Optional
-
 async def get_user(user_id: int) -> Optional[User]:
     try:
         async with async_session() as session:
             result = await session.execute(
                 select(User)
                 .where(User.user_id == user_id)
-                .options(selectinload(User.events))
+                .options(selectinload(User.events)))
             return result.scalars().first()
     except SQLAlchemyError as e:
         print(f"Error getting user: {e}")
@@ -156,7 +135,7 @@ async def get_user_tickets(user_id: int) -> List[Ticket]:
             result = await session.execute(
                 select(Ticket)
                 .where(Ticket.user_id == user_id)
-                .options(selectinload(Ticket.user))
+                .options(selectinload(Ticket.user)))
             return result.scalars().all()
     except SQLAlchemyError as e:
         print(f"Error getting tickets: {e}")
