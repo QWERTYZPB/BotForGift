@@ -58,7 +58,7 @@ class User(Base):
 class Ticket(Base):
     __tablename__ = "tickets"
     
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     number: Mapped[str] = mapped_column(String(20), unique=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     is_winner: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -84,7 +84,8 @@ class Channel(Base):
 class Event(Base):
     __tablename__ = "events"
     
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.user_id"))
     name: Mapped[str] = mapped_column(String(100))
     description: Mapped[Optional[str]] = mapped_column(Text)
     media: Mapped[Optional[str]] = mapped_column(Text)

@@ -27,12 +27,16 @@ router=Router()
 @router.message(CommandStart())
 async def start_bot(message: types.Message, command: CommandObject):
 
-    start_message = await message.answer(lexicon.START_TEXT, disable_web_page_preview=True, reply_markup=user_kb.user_start())
+    await message.answer(
+    
+        lexicon.START_TEXT, 
+        reply_markup=user_kb.user_start()
+    
+    )
 
     await add_user(       #Добавляем нового пользователя при старте бота
         user_id=message.from_user.id,
         username=message.from_user.username,
-        full_name=message.from_user.full_name,
         
     )
     
