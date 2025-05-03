@@ -1,4 +1,4 @@
-from models import User, Ticket, Channel, Event, async_session
+from database.models import User, Ticket, Channel, Event, async_session
 from sqlalchemy import select, update, delete
 from sqlalchemy.orm import selectinload
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
@@ -319,8 +319,10 @@ async def test_data():
         url="https://channelB.example"
     )
     print(f"Создан канал: channel_b")
+
     
     channel_a, channel_b = await get_channel(channel_id=1), await get_channel(channel_id=2)
+    
     # Создаем событие
     event = await create_event(
         name="Event X",
@@ -362,7 +364,7 @@ async def test_data():
     # Проверяем связи
     test_user = await get_user(1002)
     print(f"\nТестовый пользователь {test_user.user_id}:")
-    print(f"Реферер: {test_user.referrer}")
+    print(f"Реферер: {test_user.channels}")
     # print(f"Билеты: {[t.number for t in test_user.tickets]}")
 
     test_event = await get_event(1)

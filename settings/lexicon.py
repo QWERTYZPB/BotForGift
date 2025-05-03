@@ -13,42 +13,14 @@ EVENT_TEXT = """
     <b>{name}</b>
 
 Описание:
-    {}
+    {description}
 
-
-    
-
+Участников: <b>{users_count}</b>
+Призовых мест: <b>{win_count}</b>
+Дата розыгрыша: <b>{raffle_date}</b> MSK
 """
 
 
 
 
 
-
-categ_dict = {
-        "k": "karting",
-        "r": "restoraunt",
-        "c": "caraoke",
-        "b": "bowling",
-        "da": "dancing",
-        "dr": "banket"
-    }
-
-categ_dict_ru = {
-        "k": "Картинг",
-        "r": "Ресторан",
-        "c": "Караоке",
-        "b": "Боулинг",
-        "da": "Танцы",
-        "dr": "Банкеты и детские ДР"
-    }
-
-
-# categ_dict_reverses = {
-#         "karting": "k",
-#         "restoran": "r",
-#         "caraoke": "c",
-#         "bowling": "b",
-#         "dancing": "da",
-#         "banket": "dr"
-#     }

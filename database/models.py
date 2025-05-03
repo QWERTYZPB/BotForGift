@@ -25,6 +25,13 @@ user_event = Table(
     Column("event_id", BigInteger, ForeignKey("events.id")),
 )
 
+user_channel = Table(
+    "user_channel",
+    Base.metadata,
+    Column("user_id", BigInteger, ForeignKey("users.user_id")),
+    Column("id", Integer, ForeignKey("channels.id")),
+)
+
 channel_event = Table(
     "channel_event",
     Base.metadata,
@@ -46,13 +53,15 @@ class User(Base):
     user_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     username: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    referrer_id: Mapped[Optional[int]] = mapped_column(BigInteger, ForeignKey("users.user_id"))
     
     # Отношения
     tickets: Mapped[List["Ticket"]] = relationship(back_populates="user")
     referrals: Mapped[List["User"]] = relationship(back_populates="referrer")
-    referrer_id: Mapped[Optional[int]] = mapped_column(BigInteger, ForeignKey("users.user_id"))
     referrer: Mapped[Optional["User"]] = relationship(back_populates="referrals", remote_side=[user_id])
+
     events: Mapped[List["Event"]] = relationship(secondary=user_event, back_populates="users")  # Исправлено
+    channels: Mapped[List["Channel"]] = relationship(secondary=user_channel, back_populates="users")  # Исправлено
 
 
 class Ticket(Base):
@@ -79,6 +88,7 @@ class Channel(Base):
         back_populates="channels",
         lazy="selectin"  # Для асинхронной работы
     )
+
 
 
 class Event(Base):

@@ -4,7 +4,6 @@ from aiogram.filters import CommandStart, CommandObject
 
 import logging as lg
 from settings import user_kb, lexicon
-from settings.lexicon import categ_dict
 from database.req import add_user
 from database import req
 import config
@@ -22,23 +21,24 @@ from aiogram.utils.deep_linking import decode_payload
 
 
 
-router=Router()
+router = Router()
 
 @router.message(CommandStart())
 async def start_bot(message: types.Message, command: CommandObject):
 
     await message.answer(
-    
         lexicon.START_TEXT, 
-        reply_markup=user_kb.user_start()
-    
+        reply_markup=user_kb.main_reply()
     )
 
-    await add_user(       #Добавляем нового пользователя при старте бота
-        user_id=message.from_user.id,
-        username=message.from_user.username,
-        
-    )
+
+    try:
+        await add_user(
+            user_id=message.from_user.id,
+            username=message.from_user.username,
+        )
+    except Exception:
+        lg.warning(f'FAILED TO ADD USER IN START u_id:{message.from_user.id}')
     
 
 
