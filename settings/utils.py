@@ -1,8 +1,5 @@
-import segno, io
 from aiogram import types
 from aiogram.utils.media_group import MediaGroupBuilder
-
-from database import req
 
 import re, datetime, asyncio, json
 

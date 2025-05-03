@@ -4,7 +4,7 @@ import os
 os.environ.clear()
 
 env = Env()
-env.read_env('settings/.env')
+env.read_env()
 # print(env.path())
 # admins=env('ADMIN_IDS')
 # print('admins:', admins)
