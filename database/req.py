@@ -1,185 +1,309 @@
-from database.models import User, Ticket, Channel, Event, async_session
+from models import User, Ticket, Channel, Event, async_session
 from sqlalchemy import select, update, delete
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from typing import Optional, List
+import asyncio, datetime
 
 
 
 
 
+# async def add_user(**data) -> Optional[User]:
+#     try:
+#         async with async_session() as session:
+#             user = User(**data)
+#             session.add(user)
+#             await session.commit()
+#             return user
+#     except IntegrityError:
+#         await session.rollback()
+#         return await update_user(user_id=data['id'], **data)
+#     except Exception as e:
+#         print(f"Error adding user: {e}")
+#         await session.rollback()
+#         return None
 
-async def add_user(**data) -> Optional[User]:
+
+async def add_user(
+    user_id: int,
+    username: Optional[str] = None,
+    referrer_id: Optional[int] = None
+) -> Optional[User]:
+    """
+    Добавляет нового пользователя в базу данных.
+    
+    Args:
+        user_id: Уникальный ID пользователя (обязательный)
+        username: Имя пользователя (опционально)
+        referrer_id: ID пригласившего пользователя (опционально)
+        
+    Returns:
+        User: Объект пользователя или None при ошибке
+    """
     try:
         async with async_session() as session:
-            user = User(**data)
-            session.add(user)
+            # Проверка существования реферера
+            if referrer_id:
+                referrer = await session.get(User, referrer_id)
+                if not referrer:
+                    print(f"Реферер с ID {referrer_id} не найден")
+                    return None
+
+            # Создание объекта пользователя
+            new_user = User(
+                user_id=user_id,
+                username=username,
+                referrer_id=referrer_id,
+                created_at=datetime.datetime.now()
+            )
+            
+            session.add(new_user)
             await session.commit()
-            return user
-    except IntegrityError:
+            await session.refresh(new_user)
+            
+            return new_user
+            
+    except IntegrityError as e:
         await session.rollback()
-        return await update_user(user_id=data['id'], **data)
+        print(f"Ошибка целостности: {e}")
+        # Если пользователь уже существует, можно вернуть существующего
+        existing_user = await session.get(User, user_id)
+        return existing_user
+        
+    except SQLAlchemyError as e:
+        await session.rollback()
+        print(f"Ошибка базы данных: {e}")
+        return None
+        
     except Exception as e:
-        print(f"Error adding user: {e}")
-        await session.rollback()
+        print(f"Неожиданная ошибка: {e}")
         return None
 
+
+
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy import select, update, delete
+from typing import List, Optional
+
 async def get_user(user_id: int) -> Optional[User]:
-    async with async_session() as session:
-        result = await session.execute(select(User).where(User.id == user_id))
-        return result.scalars().first()
+    try:
+        async with async_session() as session:
+            result = await session.execute(
+                select(User)
+                .where(User.user_id == user_id)
+                .options(selectinload(User.events))
+            return result.scalars().first()
+    except SQLAlchemyError as e:
+        print(f"Error getting user: {e}")
+        return None
 
 async def update_user(user_id: int, **data) -> Optional[User]:
     try:
         async with async_session() as session:
-            result = await session.execute(
-                update(User)
-                .where(User.id == user_id)
-                .values(**data)
-                .returning(User)
-            )
+            user = await session.get(User, user_id)
+            if not user:
+                return None
+                
+            for key, value in data.items():
+                setattr(user, key, value)
+                
             await session.commit()
-            return result.scalars().first()
-    except Exception as e:
+            await session.refresh(user)
+            return user
+    except SQLAlchemyError as e:
         print(f"Error updating user: {e}")
         await session.rollback()
         return None
 
-async def add_ticket(**data) -> Optional[Ticket]:
+async def add_ticket(user_id: int, number: str, **kwargs) -> Optional[Ticket]:
     try:
         async with async_session() as session:
-            # Проверка существования пользователя
-            user = await get_user(data['user_id'])
+            user = await session.get(User, user_id)
             if not user:
-                raise ValueError("User does not exist")
-                
-            ticket = Ticket(**data)
+                raise ValueError(f"User {user_id} not found")
+
+            ticket = Ticket(
+                number=number,
+                user_id=user_id,
+                **kwargs
+            )
+            
             session.add(ticket)
             await session.commit()
+            await session.refresh(ticket)
             return ticket
+            
     except IntegrityError:
         await session.rollback()
-        return await update_ticket(ticket_id=data['id'], **data)
+        return await update_ticket(number=number, **kwargs)
     except Exception as e:
         print(f"Error adding ticket: {e}")
         await session.rollback()
         return None
 
 async def get_ticket(ticket_id: int) -> Optional[Ticket]:
-    async with async_session() as session:
-        result = await session.execute(select(Ticket).where(Ticket.id == ticket_id))
-        return result.scalars().first()
+    try:
+        async with async_session() as session:
+            return await session.get(Ticket, ticket_id)
+    except SQLAlchemyError as e:
+        print(f"Error getting ticket: {e}")
+        return None
 
 async def get_user_tickets(user_id: int) -> List[Ticket]:
-    async with async_session() as session:
-        result = await session.execute(select(Ticket).where(Ticket.user_id == user_id))
-        return result.scalars().all()
+    try:
+        async with async_session() as session:
+            result = await session.execute(
+                select(Ticket)
+                .where(Ticket.user_id == user_id)
+                .options(selectinload(Ticket.user))
+            return result.scalars().all()
+    except SQLAlchemyError as e:
+        print(f"Error getting tickets: {e}")
+        return []
 
 async def update_ticket(ticket_id: int, **data) -> Optional[Ticket]:
     try:
         async with async_session() as session:
-            result = await session.execute(
-                update(Ticket)
-                .where(Ticket.id == ticket_id)
-                .values(**data)
-                .returning(Ticket)
-            )
+            ticket = await session.get(Ticket, ticket_id)
+            if not ticket:
+                return None
+
+            for key, value in data.items():
+                setattr(ticket, key, value)
+                
             await session.commit()
-            return result.scalars().first()
-    except Exception as e:
+            await session.refresh(ticket)
+            return ticket
+    except SQLAlchemyError as e:
         print(f"Error updating ticket: {e}")
         await session.rollback()
         return None
 
-async def add_channel(**data) -> Optional[Channel]:
+async def add_channel(name: str, url: str) -> Optional[Channel]:
     try:
         async with async_session() as session:
-            channel = Channel(**data)
+            channel = Channel(name=name, url=url)
             session.add(channel)
             await session.commit()
+            await session.refresh(channel)
             return channel
-    except IntegrityError:
+    except IntegrityError as e:
         await session.rollback()
-        return await update_channel(channel_id=data['id'], **data)
-    except Exception as e:
+        print(f"Channel already exists: {e}")
+        return None
+    except SQLAlchemyError as e:
         print(f"Error adding channel: {e}")
         await session.rollback()
         return None
 
 async def get_channel(channel_id: int) -> Optional[Channel]:
-    async with async_session() as session:
-        result = await session.execute(select(Channel).where(Channel.id == channel_id))
-        return result.scalars().first()
+    try:
+        async with async_session() as session:
+            return await session.get(Channel, channel_id)
+    except SQLAlchemyError as e:
+        print(f"Error getting channel: {e}")
+        return None
 
 async def get_all_channels() -> List[Channel]:
-    async with async_session() as session:
-        result = await session.execute(select(Channel))
-        return result.scalars().all()
+    try:
+        async with async_session() as session:
+            result = await session.execute(select(Channel))
+            return result.scalars().all()
+    except SQLAlchemyError as e:
+        print(f"Error getting channels: {e}")
+        return []
 
 async def update_channel(channel_id: int, **data) -> Optional[Channel]:
     try:
         async with async_session() as session:
-            result = await session.execute(
-                update(Channel)
-                .where(Channel.id == channel_id)
-                .values(**data)
-                .returning(Channel)
-            )
+            channel = await session.get(Channel, channel_id)
+            if not channel:
+                return None
+
+            for key, value in data.items():
+                setattr(channel, key, value)
+                
             await session.commit()
-            return result.scalars().first()
-    except Exception as e:
+            await session.refresh(channel)
+            return channel
+    except SQLAlchemyError as e:
         print(f"Error updating channel: {e}")
         await session.rollback()
         return None
 
-
-
-
-
-
-async def create_event(**data) -> Optional[Event]:
+async def create_event(
+    name: str,
+    description: Optional[str] = None,
+    channels: List[Channel] = None,
+    **kwargs
+) -> Optional[Event]:
     try:
         async with async_session() as session:
-            event = Event(**data)
+            event = Event(
+                name=name,
+                description=description,
+                **kwargs
+            )
+            
+            if channels:
+                event.channels.extend(channels)
+                
             session.add(event)
             await session.commit()
+            await session.refresh(event)
             return event
-    except Exception as e:
+    except SQLAlchemyError as e:
         print(f"Error creating event: {e}")
         await session.rollback()
         return None
 
 async def get_active_events() -> List[Event]:
-    async with async_session() as session:
-        result = await session.execute(
-            select(Event).where(Event.is_active == True)
-        )
-        return result.scalars().all()
-
-
-
-async def get_event(event_id) -> Event:
-    async with async_session() as session:
-        result = await session.execute(
-            select(Event).where(Event.id == event_id)
-        )
-        return result.scalars().one()
-
-
-
-
-async def update_event_status(event_id: int, is_active: bool) -> bool:
     try:
         async with async_session() as session:
-            await session.execute(
-                update(Event)
-                .where(Event.id == event_id)
-                .values(is_active=is_active)
+            result = await session.execute(
+                select(Event)
+                .where(Event.is_active == True)
+                .options(
+                    selectinload(Event.channels),
+                    selectinload(Event.users))
             )
+            return result.scalars().all()
+    except SQLAlchemyError as e:
+        print(f"Error getting active events: {e}")
+        return []
+
+async def get_event(event_id: int) -> Optional[Event]:
+    try:
+        async with async_session() as session:
+            return await session.get(Event, event_id)
+    except SQLAlchemyError as e:
+        print(f"Error getting event: {e}")
+        return None
+
+async def update_event_status(event_id: int, is_active: bool) -> Optional[Event]:
+    try:
+        async with async_session() as session:
+            event = await session.get(Event, event_id)
+            if not event:
+                return None
+                
+            event.is_active = is_active
             await session.commit()
-            return True
-    except Exception as e:
+            await session.refresh(event)
+            return event
+    except SQLAlchemyError as e:
         print(f"Error updating event status: {e}")
         await session.rollback()
-        return False
+        return None
 
+
+
+
+asyncio.run(
+    add_user(
+        user_id=654321,
+        username="jane_doe"
+        # referrer_id=123456
+    )
+)
