@@ -1,4 +1,8 @@
+from aiogram import Bot, Dispatcher
+from aiogram.client.default import DefaultBotProperties
+
 from environs import Env
+
 import os
 
 os.environ.clear()
@@ -11,6 +15,12 @@ env.read_env()
 ADMIN_IDS: list[int] = list(map(int, env('ADMIN_IDS').split(',')))
 
 BOT_TOKEN = env('BOT_TOKEN')
-
+BOT_URL = env('BOT_URL')
 
 SERVER_IP=env('SERVER_IP')
+
+
+
+
+bot=Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode='html'))
+dp=Dispatcher()

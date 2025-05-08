@@ -29,7 +29,7 @@ user_channel = Table(
     "user_channel",
     Base.metadata,
     Column("user_id", BigInteger, ForeignKey("users.user_id")),
-    Column("id", Integer, ForeignKey("channels.id")),
+    Column("channel_id", BigInteger, ForeignKey("channels.id"))  # Исправлено название колонки
 )
 
 channel_event = Table(
@@ -52,6 +52,7 @@ class User(Base):
     
     user_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     username: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    fullname: Mapped[str] = mapped_column(String(200), nullable=True)  #me: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     referrer_id: Mapped[Optional[int]] = mapped_column(BigInteger, ForeignKey("users.user_id"))
     
@@ -61,19 +62,21 @@ class User(Base):
     referrer: Mapped[Optional["User"]] = relationship(back_populates="referrals", remote_side=[user_id])
 
     events: Mapped[List["Event"]] = relationship(secondary=user_event, back_populates="users")  # Исправлено
-    channels: Mapped[List["Channel"]] = relationship(secondary=user_channel, back_populates="users")  # Исправлено
+    channels: Mapped[List["Channel"]] = relationship(secondary=user_channel, back_populates="subscribers")  # Исправлено
 
 
 class Ticket(Base):
     __tablename__ = "tickets"
-    
+   
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     number: Mapped[str] = mapped_column(String(20), unique=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     is_winner: Mapped[bool] = mapped_column(Boolean, default=False)
-    
     user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.user_id"))
+    event_id: Mapped[int] = mapped_column(Integer, ForeignKey("events.id"))  # Добавлено
+    
     user: Mapped["User"] = relationship(back_populates="tickets")
+    event: Mapped["Event"] = relationship(back_populates="tickets")  # Добавлено
+
 
 class Channel(Base):
     __tablename__ = "channels"
@@ -82,12 +85,24 @@ class Channel(Base):
     name: Mapped[str] = mapped_column(String(100))
     url: Mapped[str] = mapped_column(String(200))
     
-    # Отношение к Event через промежуточную таблицу
+    # Отношение к User
+    subscribers: Mapped[List["User"]] = relationship(  # Новое отношение
+        secondary=user_channel, 
+        back_populates="channels"
+    )
+    
+    # Отношение к Event
     events: Mapped[List["Event"]] = relationship(
         secondary=channel_event_association,
-        back_populates="channels",
-        lazy="selectin"  # Для асинхронной работы
+        back_populates="channels"
     )
+
+    # # Отношение к Event через промежуточную таблицу
+    # events: Mapped[List["Event"]] = relationship(
+    #     secondary=channel_event_association,
+    #     back_populates="channels",
+    #     # lazy="selectin"  # Для асинхронной работы
+    # )
 
 
 
@@ -105,7 +120,10 @@ class Event(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
     # Исправленные отношения
-    users: Mapped[List["User"]] = relationship(secondary=user_event, back_populates="events")  # Исправлено
+    users: Mapped[List["User"]] = relationship(
+        secondary=user_event, 
+        back_populates="events"
+    )
     
     # Отношение к Channel
     channels: Mapped[List["Channel"]] = relationship(
@@ -113,9 +131,14 @@ class Event(Base):
         back_populates="events",
         lazy="selectin"
     )
+    tickets: Mapped[List["Ticket"]] = relationship(
+        back_populates="event",
+        cascade="all, delete-orphan"
+    )
 
 async def create_tables():
     async with engine.begin() as conn:
+        # await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
 
 if __name__ == "__main__":
