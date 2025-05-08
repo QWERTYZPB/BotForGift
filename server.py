@@ -64,15 +64,14 @@ async def get_winners(eventId):
 async def create_new_ticket(userId, eventId):
     
     user = await req.get_user(int(userId))
-    eventId = await req.get_event(int(eventId))
+    event = await req.get_event(int(eventId))
 
-    # generate_ticket_number -> make func-n
 
     if user and eventId:
         await req.add_ticket(
             user_id=user.user_id,
             event_id=eventId,  # Добавляем event_id
-            number = server_utils.generate_ticket_number()
+            number = await req.generate_ticket_number(event.id, user.user_id)
         )
 
         return {'ok': True}
@@ -88,6 +87,7 @@ async def check_sub(userID, EventId):
     # print(EventId)
     
     event = await req.get_event(event_id=int(EventId))
+    user = await req.get_user(int(userID))
 
     # print(event)
 
@@ -95,6 +95,15 @@ async def check_sub(userID, EventId):
     
     result = await server_utils.get_json_subscriptions(bot, int(userID), event.channels)
     # print(result)
+
+
+
+    if len(user.tickets) == 0 and result['allSubscribed']: 
+        await req.add_ticket(
+            user_id=user.user_id,
+            event_id=int(EventId),  # Добавляем event_id
+            number = await req.generate_ticket_number(event.id, user.user_id)
+        )
 
     return result
 
@@ -122,7 +131,7 @@ async def check_sub(userID, EventId):
 #     file_path = os.path.join(requested_path)
 
 #     try:
-#         return await send_file(file_path, cache_timeout=0)
+#         return await send_file(file_path, cache_timeout=0 and result)
 #     except FileNotFoundError:
 #         return Response(status=404, response="File not found")
 #     except Exception:

@@ -25,25 +25,26 @@ async def get_json_subscriptions(bot: Bot, user_tg_id: int, channels: List[Chann
     }
 
     for channel in channels:
-        try:
-            u_status = await bot.get_chat_member(
-                chat_id=channel.id,
-                user_id=user_tg_id
-            )
+        if channel.is_active:
+            try:
+                u_status = await bot.get_chat_member(
+                    chat_id=channel.id,
+                    user_id=user_tg_id
+                )
 
 
-        except Exception as e:
-            print('err in check channel', e)
-        
-        if not (isinstance(u_status, ChatMemberMember) or isinstance(u_status, ChatMemberAdministrator) \
-                or isinstance(u_status, ChatMemberOwner)):
-            result['details'].append(
-                {
-                    "channelId": channel.id,
-                    "channelName": channel.name,
-                    "isSubscribed": False
-                }
-            )
+            except Exception as e:
+                print('err in check channel', e)
+            
+            if not (isinstance(u_status, ChatMemberMember) or isinstance(u_status, ChatMemberAdministrator) \
+                    or isinstance(u_status, ChatMemberOwner)):
+                result['details'].append(
+                    {
+                        "channelId": channel.id,
+                        "channelName": channel.name,
+                        "isSubscribed": False
+                    }
+                )
             
     if len(result['details']) == 0:
         result['allSubscribed'] = True
@@ -74,11 +75,6 @@ async def get_json_subscriptions(bot: Bot, user_tg_id: int, channels: List[Chann
 #         return generate_ticket_number(eventId, max_att-1)
     
 #     return ticket
-
-    
-
-import asyncio
-print(asyncio.run(generate_ticket_number(1)))
 
 
 
@@ -184,14 +180,15 @@ async def get_json_event_channels(eventId):
     channels = []
 
     for channel in channels_event:
-        channels.append(
-            {
-                "id": channel.id,
-                "name": channel.name,
-                "url": channel.url,
-                "isSubscribed": False # here will be another function
-            }
-        )
+        if channel.is_active:
+            channels.append(
+                {
+                    "id": channel.id,
+                    "name": channel.name,
+                    "url": channel.url,
+                    "isSubscribed": False # here will be another function
+                }
+            )
 
     return {
         "data": channels

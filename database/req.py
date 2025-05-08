@@ -1,4 +1,4 @@
-from database.models import User, Ticket, Channel, Event, async_session
+from models import User, Ticket, Channel, Event, async_session
 from sqlalchemy import select, update, delete
 from sqlalchemy.orm import selectinload
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
@@ -75,11 +75,11 @@ async def get_user(user_id: int) -> Optional[User]:
     async with async_session() as session:
         result = await session.execute(
             select(User)
-            .where(User.user_id == user_id) # Жадно загружаем реферера  
-            .options(selectinload(User.referrer), selectinload(User.tickets)) 
+            .where(User.user_id == user_id) 
         )
         return result.scalars().one()
     
+
 async def update_user(user_id: int, **data) -> Optional[User]:
     try:
         async with async_session() as session:
@@ -97,6 +97,8 @@ async def update_user(user_id: int, **data) -> Optional[User]:
         print(f"Error updating user: {e}")
         await session.rollback()
         return None
+
+
 
 async def add_ticket(
     user_id: int,
@@ -139,7 +141,7 @@ async def add_ticket(
 async def generate_ticket_number(event_id: int, user_id: int) -> Optional[str]:
     """
     Генерирует уникальный номер билета для указанного события и пользователя.
-    Формат: EVENT-{RANDOM_4_DIGITS}-{USER_ID}
+    Формат: XXXXXX
     """
     try:
         async with async_session() as session:
@@ -148,9 +150,9 @@ async def generate_ticket_number(event_id: int, user_id: int) -> Optional[str]:
                 select(Event)
                 .where(Event.id == event_id)
                 .options(selectinload(Event.tickets))
-            ).scalars().first()
+            )
 
-            if not event:
+            if not event.scalars().first():
                 print(f"Событие с ID {event_id} не найдено")
                 return None
 
@@ -166,7 +168,7 @@ async def generate_ticket_number(event_id: int, user_id: int) -> Optional[str]:
                     select(Ticket)
                     .where(Ticket.number == new_number)
                 )
-                
+
                 
                 if not exists.scalars().first():
                     break
@@ -176,7 +178,7 @@ async def generate_ticket_number(event_id: int, user_id: int) -> Optional[str]:
                 number=new_number,
                 user_id=user_id,
                 event_id=event_id,
-                created_at=datetime.utcnow()
+                created_at=datetime.now()
             )
             
             session.add(ticket)
@@ -203,13 +205,16 @@ async def get_ticket(ticket_id: int) -> Optional[Ticket]:
         print(f"Error getting ticket: {e}")
         return None
 
+
+
+
 async def get_user_tickets(user_id: int) -> List[Ticket]:
     try:
         async with async_session() as session:
             result = await session.execute(
                 select(Ticket)
                 .where(Ticket.user_id == user_id)
-                .options(selectinload(Ticket.user)))
+                )
             return result.scalars().all()
     except SQLAlchemyError as e:
         print(f"Error getting tickets: {e}")
@@ -233,14 +238,21 @@ async def get_user_tickets(user_id: int) -> List[Ticket]:
 #         await session.rollback()
 #         return None
 
-async def add_channel(cid:int, name: str, url: str) -> Optional[Channel]:
+async def add_channel(channel_id:int, name: str, url: str, root_event_id: int) -> Optional[Channel]:
     try:
         async with async_session() as session:
-            channel = Channel(id=cid, name=name, url=url)
+            channel = Channel(
+                id=channel_id, 
+                name=name, 
+                url=url,
+                root_event_id=root_event_id
+            )
+
             session.add(channel)
             await session.commit()
             await session.refresh(channel)
             return channel
+        
     except IntegrityError as e:
         await session.rollback()
         print(f"Channel already exists: {e}")
@@ -249,11 +261,14 @@ async def add_channel(cid:int, name: str, url: str) -> Optional[Channel]:
         print(f"Error adding channel: {e}")
         await session.rollback()
         return None
+    
 
-async def get_channel(channel_id: int) -> Optional[Channel]:
+
+
+async def get_channel(id: int) -> Optional[Channel]:
     try:
         async with async_session() as session:
-            return await session.get(Channel, channel_id)
+            return await session.get(Channel, id)
     except SQLAlchemyError as e:
         print(f"Error getting channel: {e}")
         return None
@@ -329,17 +344,23 @@ async def get_active_events() -> List[Event]:
 
 async def get_event_winners(event_id: int) -> List[User]:
     async with async_session() as session:
-        result = await session.execute(
-            select(User)
+        result = []
+
+        event_ = await session.execute(
+            select(Event)
             .where(
-                Event.id == event_id,
-                Ticket.is_winner == True
-            )
-            .options(
-                selectinload(User.tickets)
+                Event.id == event_id
             )
         )
-        return result.scalars().all()
+        event = event_.scalars().first()
+
+        for ticket in event.tickets_event.split(','):
+            t = await get_ticket(int(ticket))
+            if t.is_winner:
+                result.append(await get_user(t.user_id))
+
+
+        return result
 
 
 async def get_event(event_id: int) -> Optional[Event]:
@@ -427,24 +448,24 @@ async def delete_event(event_id: int) -> bool:
 async def test_data():
     
     # Создаем пользователей
-    user1 = await add_user(
-        user_id=1060834219,
-        username="pbadev",
-        fullname='PBA'
-    )
+    # user1 = await add_user(
+    #     user_id=1060834219,
+    #     username="pbadev",
+    #     fullname='PBA'
+    # )
 
     # Создаем каналы
     channel_a = await add_channel(
-        cid=1,
-        name="Channel A",
-        url="https://channelA.example"
+        cid=-1002141057588,
+        name="PBA CODE",
+        url="https://t.me/pbacode"
     )
     print(f"Создан канал: channel_a")
 
     channel_b = await add_channel(
-        cid=2,
-        name="Channel B",
-        url="https://channelB.example"
+        cid=-1001744551956,
+        name="PBA TEAM",
+        url="https://t.me/pbateam"
     )
     print(f"Создан канал: channel_b")
 
@@ -465,11 +486,11 @@ async def test_data():
     print(f"Создано событие: event x")
  
     # Создаем билеты
-    ticket1 = await add_ticket(
-        user_id=1060834219,
-        event_id=event.id,  # Добавляем event_id
-        number="T1001-1"
-    )
+    # ticket1 = await add_ticket(
+    #     user_id=1060834219,
+    #     event_id=event.id,  # Добавляем event_id
+    #     number="T1001-1"
+    # )
     # print(f"Создан билет: ticket1")
 
     # ticket2 = await add_ticket(
@@ -502,7 +523,7 @@ async def test_data():
     # print(f"Каналы: {[c.name for c in test_event.channels]}")
 
 
-# asyncio.run(test_data())
+asyncio.run(test_data())
 
 
 # asyncio.run(delete_event(2))
