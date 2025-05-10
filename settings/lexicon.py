@@ -17,7 +17,7 @@ EVENT_TEXT = """
 
 Участников: <b>{users_count}</b>
 Призовых мест: <b>{win_count}</b>
-Дата розыгрыша: <b>{raffle_date}</b> MSK
+Дата окончания розыгрыша: <b>{raffle_date}</b> MSK
 """
 
 

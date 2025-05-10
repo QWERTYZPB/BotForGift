@@ -2,3 +2,4 @@
 TASK
 venv/*
 __pycache__/*
+t.py

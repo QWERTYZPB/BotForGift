@@ -15,10 +15,11 @@ env.read_env()
 ADMIN_IDS: list[int] = list(map(int, env('ADMIN_IDS').split(',')))
 
 BOT_TOKEN = env('BOT_TOKEN')
+
 BOT_URL = env('BOT_URL')
 
-SERVER_IP=env('SERVER_IP')
-
+SERVER_IP = env('SERVER_IP')
+WEBHOOK_URL = 'https://'+SERVER_IP
 
 
 

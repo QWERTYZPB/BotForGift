@@ -57,19 +57,19 @@ class User(Base):
     referrer_id: Mapped[Optional[int]] = mapped_column(BigInteger, ForeignKey("users.user_id"))
     
     # Отношения
-    tickets_ids: Mapped[str] = mapped_column(String)
-    referrals: Mapped[str] = mapped_column(String)
-    referrer: Mapped[int] = mapped_column(Integer)
+    referrals: Mapped[str] = mapped_column(String, nullable=True)
+    referrer: Mapped[int] = mapped_column(Integer, nullable=True)
 
-    event_ids: Mapped[str] = mapped_column(String)
-    channel_ids: Mapped[str] = mapped_column(String) 
+    tickets_ids: Mapped[str] = mapped_column(String, nullable=True)
+    event_ids: Mapped[str] = mapped_column(String, nullable=True)
+    channel_ids: Mapped[str] = mapped_column(String, nullable=True) 
 
 
 class Ticket(Base):
     __tablename__ = "tickets"
    
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    number: Mapped[str] = mapped_column(String(20), unique=True)
+    number: Mapped[str] = mapped_column(String(20), nullable=False)
     is_winner: Mapped[bool] = mapped_column(Boolean, default=False)
     
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
@@ -84,7 +84,7 @@ class Channel(Base):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     name: Mapped[str] = mapped_column(String(100))
 
-    root_event_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    root_event_ids: Mapped[str] = mapped_column(String, nullable=True)
     url: Mapped[str] = mapped_column(String(200))
 
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
@@ -106,12 +106,14 @@ class Event(Base):
     
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
-    user_event_ids: Mapped[str] = mapped_column(String)
+    user_event_ids: Mapped[str] = mapped_column(String, nullable=True)
     
     # Отношение к Channel
-    channel_event_ids: Mapped[str] = mapped_column(String)
+    channel_event_ids: Mapped[str] = mapped_column(String, nullable=True)
 
-    tickets_event: Mapped[str] = mapped_column(String)
+    tickets_event: Mapped[str] = mapped_column(String, nullable=True)
+
+    message_ids: Mapped[str] = mapped_column(String, nullable=True)
 
 
 

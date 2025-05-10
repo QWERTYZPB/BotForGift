@@ -1,4 +1,4 @@
-from models import User, Ticket, Channel, Event, async_session
+from database.models import User, Ticket, Channel, Event, async_session
 from sqlalchemy import select, update, delete
 from sqlalchemy.orm import selectinload
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
@@ -149,7 +149,6 @@ async def generate_ticket_number(event_id: int, user_id: int) -> Optional[str]:
             event = await session.execute(
                 select(Event)
                 .where(Event.id == event_id)
-                .options(selectinload(Event.tickets))
             )
 
             if not event.scalars().first():
@@ -238,14 +237,14 @@ async def get_user_tickets(user_id: int) -> List[Ticket]:
 #         await session.rollback()
 #         return None
 
-async def add_channel(channel_id:int, name: str, url: str, root_event_id: int) -> Optional[Channel]:
+async def add_channel(channel_id:int, name: str, url: str, root_event_ids: str = None) -> Optional[Channel]:
     try:
         async with async_session() as session:
             channel = Channel(
                 id=channel_id, 
                 name=name, 
                 url=url,
-                root_event_id=root_event_id
+                root_event_ids=root_event_ids
             )
 
             session.add(channel)
@@ -355,9 +354,10 @@ async def get_event_winners(event_id: int) -> List[User]:
         event = event_.scalars().first()
 
         for ticket in event.tickets_event.split(','):
-            t = await get_ticket(int(ticket))
-            if t.is_winner:
-                result.append(await get_user(t.user_id))
+            if not ticket == '':    
+                t = await get_ticket(int(ticket))
+                if t.is_winner:
+                    result.append(await get_user(t.user_id))
 
 
         return result
@@ -369,9 +369,7 @@ async def get_event(event_id: int) -> Optional[Event]:
              result = await session.execute(
                 select(Event)
                 .where(Event.id == event_id)
-                .options(
-                    selectinload(Event.users).selectinload(User.tickets)  # Цепочка загрузки
-                )
+        
             )
         return result.scalars().first()
     except SQLAlchemyError as e:
@@ -394,6 +392,28 @@ async def update_event_status(event_id: int, is_active: bool) -> Optional[Event]
         await session.rollback()
         return None
 
+
+
+async def update_event(event_id: int, **kw) -> Optional[Event]:
+    try:
+        async with async_session() as session:
+            event = await session.get(Event, event_id)
+            if not event:
+                return None
+                
+            for key, value in kw.items():
+                setattr(event, key, value)
+                
+            await session.commit()
+            await session.refresh(event)
+            return event
+    except SQLAlchemyError as e:
+        print(f"Error updating event status: {e}")
+        await session.rollback()
+        return None
+
+
+
 async def delete_event(event_id: int) -> bool:
     """
     Удаляет событие и все связанные с ним данные (билеты, связи с каналами)
@@ -410,10 +430,6 @@ async def delete_event(event_id: int) -> bool:
             q = await session.execute(
                 select(Event)
                 .where(Event.id == event_id)
-                .options(
-                    selectinload(Event.tickets),
-                    selectinload(Event.channels)
-                )
             )
             
             event = q.scalars().first()
@@ -422,14 +438,14 @@ async def delete_event(event_id: int) -> bool:
                 print(f"Событие с ID {event_id} не найдено")
                 return False
 
-            # Удаляем связанные билеты
-            if event.tickets:
-                for ticket in event.tickets:
-                    await session.delete(ticket)
+            # # Удаляем связанные билеты
+            # if event.tickets:
+            #     for ticket in event.tickets:
+            #         await session.delete(ticket)
 
-            # Удаляем связи с каналами
-            if event.channels:
-                event.channels.clear()
+            # # Удаляем связи с каналами
+            # if event.channels:
+            #     event.channels.clear()
 
             # Удаляем само событие
             await session.delete(event)
@@ -455,28 +471,28 @@ async def test_data():
     # )
 
     # Создаем каналы
+    print(f"Создан канал: channel_b")
+
     channel_a = await add_channel(
-        cid=-1002141057588,
+        root_event_ids='1',
+        channel_id=-1002141057588,
         name="PBA CODE",
         url="https://t.me/pbacode"
     )
     print(f"Создан канал: channel_a")
 
     channel_b = await add_channel(
-        cid=-1001744551956,
+        root_event_ids='1',
+        channel_id=-1001744551956,
         name="PBA TEAM",
         url="https://t.me/pbateam"
     )
-    print(f"Создан канал: channel_b")
 
-    
-    channel_a, channel_b = await get_channel(channel_id=1), await get_channel(channel_id=2)
-    
     # Создаем событие
     event = await create_event(
         name="Event X",
         description="Test Event X",
-        channels=[channel_a, channel_b],
+        channel_event_ids= ','.join(['-1002141057588', '-1001744551956']),
         win_count=5,
         start_date=datetime.now(),
         end_date=datetime.now() + timedelta(days=7),
@@ -523,7 +539,7 @@ async def test_data():
     # print(f"Каналы: {[c.name for c in test_event.channels]}")
 
 
-asyncio.run(test_data())
+# asyncio.run(test_data())
 
 
 # asyncio.run(delete_event(2))

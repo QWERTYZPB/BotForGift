@@ -53,9 +53,12 @@ async def get_event(eventId):
 async def get_winners(eventId):
     
     eventId = int(eventId)
-
-    return await server_utils.get_json_event_winners(eventId)
-
+    data = await server_utils.get_json_event_winners(eventId)
+    print(data)
+    try:
+        return {'ok':True, 'result': data}
+    except:
+        return {'ok': False}
 
 
 
@@ -89,21 +92,42 @@ async def check_sub(userID, EventId):
     event = await req.get_event(event_id=int(EventId))
     user = await req.get_user(int(userID))
 
+    
     # print(event)
+
+    channels = [await req.get_channel(int(i)) for i in event.channel_event_ids.split(',') if i!='']
 
     
     
-    result = await server_utils.get_json_subscriptions(bot, int(userID), event.channels)
+    result = await server_utils.get_json_subscriptions(bot, int(userID), channels)
     # print(result)
 
 
 
-    if len(user.tickets) == 0 and result['allSubscribed']: 
-        await req.add_ticket(
+    if await server_utils.user_tickets_not_in_event(user, event) and result['allSubscribed']: 
+        print('yes')
+        ticket = await req.add_ticket(
             user_id=user.user_id,
             event_id=int(EventId),  # Добавляем event_id
             number = await req.generate_ticket_number(event.id, user.user_id)
         )
+        # print(ticket)
+
+        if not event.tickets_event:
+            event.tickets_event = ''
+        
+        if not user.tickets_ids:
+            user.tickets_ids = ''
+
+        await req.update_event(
+            event_id=int(EventId),
+            tickets_event=event.tickets_event+str(ticket.id)+','
+        )
+
+        await req.update_user(
+            user_id=user.user_id, 
+            tickets_ids=user.tickets_ids+str(ticket.id)+','
+            )
 
     return result
 
