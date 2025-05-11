@@ -134,7 +134,7 @@ def show_private_chat_web_app(event_id):
             [
                 InlineKeyboardButton(
                     text='Учавствую', 
-                    url=WebAppInfo(url=f'https://{config.HOST_URL}/?eventId={event_id}')
+                    web_app=WebAppInfo(url=f'https://{config.HOST_URL}/?eventId={event_id}')
                     )
             ]
         ]
