@@ -11,10 +11,10 @@ from config import bot
 app = quart.Quart(__name__)
 quart_cors.cors(app, allow_origin=['*'])
 
+APP_PREFIX='/api'
 
 
-
-@app.route('/channels/<userId>')
+@app.route(APP_PREFIX+'/channels/<userId>')
 async def get_channels(userId):
 
     userId = int(userId)
@@ -22,7 +22,7 @@ async def get_channels(userId):
     return await server_utils.get_json_event_channels(userId)
 
 
-@app.route('/users/<userId>-<eventId>')
+@app.route(APP_PREFIX+'/users/<userId>-<eventId>')
 async def get_user(userId, eventId):
 
     userId, eventId = int(userId), int(eventId)
@@ -31,7 +31,7 @@ async def get_user(userId, eventId):
 
 
 
-@app.route('/tickets/<userId>')
+@app.route(APP_PREFIX+'/tickets/<userId>')
 async def get_tickets(userId):
     
     userId = int(userId)
@@ -39,7 +39,7 @@ async def get_tickets(userId):
     return await server_utils.get_json_user_tickets(userId)
 
 
-@app.route('/getEvent/<eventId>', methods=["GET"])
+@app.route(APP_PREFIX+'/getEvent/<eventId>', methods=["GET"])
 async def get_event(eventId):
     
     eventId = int(eventId)
@@ -49,7 +49,7 @@ async def get_event(eventId):
 
 
 
-@app.route('/getWinners/<eventId>', methods=["GET"])
+@app.route(APP_PREFIX+'/getWinners/<eventId>', methods=["GET"])
 async def get_winners(eventId):
     
     eventId = int(eventId)
@@ -63,7 +63,7 @@ async def get_winners(eventId):
 
 
 
-@app.route('/addTicket/<UserId>-<eventId>')
+@app.route(APP_PREFIX+'/addTicket/<UserId>-<eventId>')
 async def create_new_ticket(userId, eventId):
     
     user = await req.get_user(int(userId))
@@ -85,7 +85,7 @@ async def create_new_ticket(userId, eventId):
 
 
 
-@app.route('/check-subscriptions/<userID>-<EventId>', methods=["POST"])
+@app.route(APP_PREFIX+'/check-subscriptions/<userID>-<EventId>', methods=["POST"])
 async def check_sub(userID, EventId):
     # print(EventId)
     
