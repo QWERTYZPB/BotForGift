@@ -231,23 +231,8 @@ async def get_user_tickets(user_id: int) -> List[Ticket]:
         print(f"Error getting tickets: {e}")
         return []
 
-# async def update_ticket(**data) -> Optional[Ticket]:
-#     try:
-#         async with async_session() as session:
-#             ticket = await session.get(Ticket, data['user_id'])
-#             if not ticket:
-#                 return None
 
-#             for key, value in data.items():
-#                 setattr(ticket, key, value)
-                
-#             await session.commit()
-#             await session.refresh(ticket)
-#             return ticket
-#     except SQLAlchemyError as e:
-#         print(f"Error updating ticket: {e}")
-#         await session.rollback()
-#         return None
+
 
 async def add_channel(channel_id:int, name: str, url: str, root_event_ids: str = None) -> Optional[Channel]:
     try:
@@ -450,14 +435,6 @@ async def delete_event(event_id: int) -> bool:
                 print(f"Событие с ID {event_id} не найдено")
                 return False
 
-            # # Удаляем связанные билеты
-            # if event.tickets:
-            #     for ticket in event.tickets:
-            #         await session.delete(ticket)
-
-            # # Удаляем связи с каналами
-            # if event.channels:
-            #     event.channels.clear()
 
             # Удаляем само событие
             await session.delete(event)
@@ -473,33 +450,6 @@ async def delete_event(event_id: int) -> bool:
         return False
 
 
-async def test_data():
-    
-    # Создаем пользователей
-    # user1 = await add_user(
-    #     user_id=1060834219,
-    #     username="pbadev",
-    #     fullname='PBA'
-    # )
-
-    # Создаем каналы
-    print(f"Создан канал: channel_b")
-
-    channel_a = await add_channel(
-        root_event_ids='1',
-        channel_id=-1002141057588,
-        name="PBA CODE",
-        url="https://t.me/pbacode"
-    )
-    print(f"Создан канал: channel_a")
-
-    channel_b = await add_channel(
-        root_event_ids='1',
-        channel_id=-1001744551956,
-        name="PBA TEAM",
-        url="https://t.me/pbateam"
-    )
-
     # Создаем событие
     event = await create_event(
         name="Event X",
@@ -512,46 +462,5 @@ async def test_data():
         owner_id=1060834219  # Используем существующий user_id
     )
     print(f"Создано событие: event x")
- 
-    # Создаем билеты
-    # ticket1 = await add_ticket(
-    #     user_id=1060834219,
-    #     event_id=event.id,  # Добавляем event_id
-    #     number="T1001-1"
-    # )
-    # print(f"Создан билет: ticket1")
-
-    # ticket2 = await add_ticket(
-    #     user_id=1001,
-    #     number="T1001-2"
-    # )
-    # print(f"Создан билет: ticket2")
-
-    # ticket3 = await add_ticket(
-    #     user_id=1002,
-    #     number="T1002-1"
-    # )
-    # print(f"Создан билет: ticket3")
-
-    # ticket4 = await add_ticket(
-    #     user_id=1003,
-    #     number="T1003-1"
-    # )
-    # print(f"Создан билет: ticket4")
-    
-    # # Проверяем связи
-    # test_user = await get_user(1002)
-    # print(f"\nТестовый пользователь {test_user.user_id}:")
-    # print(f"Реферер: {test_user.channels}")
-    # # print(f"Билеты: {[t.number for t in test_user.tickets]}")
-
-    # test_event = await get_event(1)
-    # # print(f"\nТестовое событие {test_event.name}:")
-    # # print(f"\nТестовое событие {test_event}:")
-    # print(f"Каналы: {[c.name for c in test_event.channels]}")
 
 
-# asyncio.run(test_data())
-
-
-# asyncio.run(delete_event(2))

@@ -84,8 +84,8 @@ async def start_bot(message: types.Message, command: CommandObject):
         except:
             pass
         
-    print(message)
-    
+    # print(message)
+
     await message.answer(
         lexicon.START_TEXT, 
         reply_markup=user_kb.main_reply()

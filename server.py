@@ -76,11 +76,7 @@ async def create_new_ticket(userId, eventId):
 
 
     if user and eventId:
-        await req.add_ticket(
-            user_id=user.user_id,
-            event_id=eventId,  # Добавляем event_id
-            number = await req.generate_ticket_number(event.id, user.user_id)
-        )
+        await req.generate_ticket_number(event.id, user.user_id)
 
         return {'ok': True}
     
