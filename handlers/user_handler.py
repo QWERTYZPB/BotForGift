@@ -465,7 +465,7 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
                     win_count=win_count,
                     raffle_date=raffle_data
                     ),
-                    reply_markup= user_kb.show_event_web_kb(event.id, url=webapp_url)
+                    reply_markup= user_kb.show_event_web_kb(url=webapp_url)
                 )
             else:
                 message = await bot.send_message(
@@ -477,7 +477,7 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
                     win_count=win_count,
                     raffle_date=raffle_data
                     ),
-                    reply_markup= user_kb.show_event_web_kb(event.id, url=webapp_url)
+                    reply_markup= user_kb.show_event_web_kb(url=webapp_url)
                 )
             if message:
                 event_message_ids = ''
