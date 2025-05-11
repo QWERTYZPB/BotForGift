@@ -51,7 +51,7 @@ async def start_bot(message: types.Message, command: CommandObject):
             user_count = 0
             win_count = None
             raffle_data = None
-            
+
             if event.user_event_ids:
                 user_count = len(event.user_event_ids.split(','))
             
@@ -191,7 +191,7 @@ async def edit_event(cb: types.CallbackQuery, state: FSMContext):
 
     if action == 'name':
         await cb.message.answer(
-            text='Введите новое наименование розыргрыша:',
+            text='Введите новое наименование розыгрыша:',
             reply_markup=user_kb.back_to_menu()
         )
         
@@ -207,14 +207,14 @@ async def edit_event(cb: types.CallbackQuery, state: FSMContext):
     
     elif action == 'description':
         await cb.message.answer(
-            text='Введите новое описание розыргрыша:',
+            text='Введите новое описание розыгрыша:',
             reply_markup=user_kb.back_to_menu()
         )
         await state.set_state(UserStates.EditEventState.inp)
     
     elif action == 'wins':
         await cb.message.answer(
-            text='Введите новое кол-во призовых мест розыргрыша:',
+            text='Введите новое кол-во призовых мест розыгрыша:',
             reply_markup=user_kb.back_to_menu()
         )
         await state.set_state(UserStates.EditEventState.inp)
@@ -233,7 +233,7 @@ async def edit_event(cb: types.CallbackQuery, state: FSMContext):
     
     elif action == 'date':
         await cb.message.answer(
-            text=f'Введите новую дату окончания розыргрыша:\n\nФормат: <b>{datetime.now().strftime("%d.%m.%Y %H:%M")}</b>',
+            text=f'Введите новую дату окончания розыгрыша:\n\nФормат: <b>{datetime.now().strftime("%d.%m.%Y %H:%M")}</b>',
             reply_markup=user_kb.back_to_menu()
         )
         await state.set_state(UserStates.EditEventState.inp)
