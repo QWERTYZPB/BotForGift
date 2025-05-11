@@ -14,6 +14,11 @@ quart_cors.cors(app, allow_origin=['*'])
 APP_PREFIX='/api'
 
 
+@app.route(APP_PREFIX+'/test')
+async def get_test_message():
+    return {"ok": True}
+
+
 @app.route(APP_PREFIX+'/channels/<userId>')
 async def get_channels(userId):
 
