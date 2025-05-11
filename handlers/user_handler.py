@@ -51,7 +51,7 @@ async def start_bot(message: types.Message, command: CommandObject):
             user_count = 0
             win_count = None
             raffle_data = None
-            message: types.Message = None
+            
             if event.user_event_ids:
                 user_count = len(event.user_event_ids.split(','))
             
@@ -59,7 +59,7 @@ async def start_bot(message: types.Message, command: CommandObject):
             raffle_data = event.end_date.strftime("%d.%m.%Y, %H:%M")
 
             if event.media:
-                message = await message.answer_photo(
+                await message.answer_photo(
                     photo=event.media,
                     caption=lexicon.EVENT_TEXT.format(
                     name=event.name,
@@ -71,7 +71,7 @@ async def start_bot(message: types.Message, command: CommandObject):
                     reply_markup= user_kb.show_private_chat_web_app(event.id)
                 )
             else:
-                message = await message.answer(
+                await message.answer(
                     text=lexicon.EVENT_TEXT.format(
                     name=event.name,
                     description=event.description or '',
