@@ -11,9 +11,10 @@ from typing import List, Optional
 
 engine = create_async_engine(
     url="sqlite+aiosqlite:///database/db.sqlite3",
-    pool_size=20,
+    pool_size=10,
     max_overflow=0,
-    pool_recycle=300
+    pool_recycle=300,
+    connect_args={"check_same_thread": False}
 )
 
 
