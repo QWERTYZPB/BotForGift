@@ -9,42 +9,20 @@ import asyncio
 from datetime import datetime
 from typing import List, Optional
 
-engine = create_async_engine(url="sqlite+aiosqlite:///database/db.sqlite3")
+engine = create_async_engine(
+    url="sqlite+aiosqlite:///database/db.sqlite3",
+    pool_size=20,
+    max_overflow=0,
+    pool_recycle=300
+)
+
+
 async_session = async_sessionmaker(engine, expire_on_commit=False)
 
 class Base(DeclarativeBase, AsyncAttrs):
     pass
 
 
-
-# Ассоциативная таблица для связи User и Event
-# user_event = Table(
-#     "user_event",
-#     Base.metadata,
-#     Column("user_id", BigInteger, ForeignKey("users.user_id")),
-#     Column("event_id", BigInteger, ForeignKey("events.id")),
-# )
-
-# user_channel = Table(
-#     "user_channel",
-#     Base.metadata,
-#     Column("user_id", BigInteger, ForeignKey("users.user_id")),
-#     Column("channel_id", BigInteger, ForeignKey("channels.id"))  # Исправлено название колонки
-# )
-
-# channel_event = Table(
-#     "channel_event",
-#     Base.metadata,
-#     Column("channel_id", BigInteger, ForeignKey("channels.id")),
-#     Column("event_id", BigInteger, ForeignKey("events.id")),
-# )
-
-# channel_event_association = Table(
-#     "channel_event_association",
-#     Base.metadata,
-#     Column("channel_id", BigInteger, ForeignKey("channels.id")),
-#     Column("event_id", BigInteger, ForeignKey("events.id")),
-# )
 
 
 class User(Base):
