@@ -81,8 +81,8 @@ async def start_bot(message: types.Message, command: CommandObject):
                     ),
                     reply_markup= user_kb.show_private_chat_web_app(event.id)
                 )
-        except:
-            pass
+        except Exception as e:
+            lg.error(f"ERROR WHILE PARSING EVENT: {e}")
         
     # print(message)
 
