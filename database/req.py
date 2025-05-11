@@ -55,7 +55,7 @@ async def add_user(
             
     except IntegrityError as e:
         await session.rollback()
-        print(f"Ошибка целостности: {e}")
+        # print(f"Ошибка целостности: {e}")
         # Если пользователь уже существует, можно вернуть существующего
         existing_user = await session.get(User, user_id)
         return existing_user
@@ -141,7 +141,7 @@ async def add_ticket(
 async def generate_ticket_number(event_id: int, user_id: int) -> Optional[str]:
     """
     Генерирует уникальный номер билета для указанного события и пользователя.
-    Формат: XXXXXX
+    Формат: XXXXXXgenerate
     """
     try:
         async with async_session() as session:
@@ -156,22 +156,15 @@ async def generate_ticket_number(event_id: int, user_id: int) -> Optional[str]:
                 return None
 
             # Генерируем уникальный номер
+            new_number = generate_ticket()
+            tickets = [i.number for i in await get_tickets()]
+            print(tickets)
+
             while True:
-                characters = string.ascii_uppercase + string.digits
-    
-                # Генерация билета из 6 случайных символов
-                new_number = ''.join(random.choice(characters) for _ in range(6))
-                
-                # Проверяем уникальность номера
-                exists = await session.execute(
-                    select(Ticket)
-                    .where(Ticket.number == new_number)
-                )
-
-                
-                if not exists.scalars().first():
+                if new_number not in tickets:
                     break
-
+                new_number = generate_ticket()
+            
             # Создаем билет
             ticket = Ticket(
                 number=new_number,
@@ -192,6 +185,13 @@ async def generate_ticket_number(event_id: int, user_id: int) -> Optional[str]:
 
 
 
+def generate_ticket():
+    characters = string.ascii_uppercase + string.digits
+    new_number = ''.join(random.choice(characters) for _ in range(6))
+    
+    return new_number            
+
+
 
 
 
@@ -200,6 +200,18 @@ async def get_ticket(ticket_id: int) -> Optional[Ticket]:
     try:
         async with async_session() as session:
             return await session.get(Ticket, ticket_id)
+    except SQLAlchemyError as e:
+        print(f"Error getting ticket: {e}")
+        return None
+
+async def get_tickets() -> List[Ticket]:
+    try:
+        async with async_session() as session:
+            result = await session.execute(
+                select(Ticket)
+                )
+            return result.scalars().all()
+        
     except SQLAlchemyError as e:
         print(f"Error getting ticket: {e}")
         return None

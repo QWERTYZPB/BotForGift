@@ -41,10 +41,10 @@ Traceback (most recent call last):
   File "/home/pba/Desktop/work/work/WorkWithAnton/SuperGiftBot/bot/venv/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 43, in call
     return await wrapped()
            ^^^^^^^^^^^^^^^
-  File "/home/pba/Desktop/work/work/WorkWithAnton/SuperGiftBot/bot/handlers/user_handler.py", line 396, in confirm_sending
-    message = await bot.send_photo(
-              ^^^^^^^^^^^^^^^^^^^^^
-  File "/home/pba/Desktop/work/work/WorkWithAnton/SuperGiftBot/bot/venv/lib/python3.12/site-packages/aiogram/client/bot.py", line 2920, in send_photo
+  File "/home/pba/Desktop/work/work/WorkWithAnton/SuperGiftBot/bot/handlers/user_handler.py", line 409, in confirm_sending
+    message = await bot.send_message(
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pba/Desktop/work/work/WorkWithAnton/SuperGiftBot/bot/venv/lib/python3.12/site-packages/aiogram/client/bot.py", line 2850, in send_message
     return await self(call, request_timeout=request_timeout)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "/home/pba/Desktop/work/work/WorkWithAnton/SuperGiftBot/bot/venv/lib/python3.12/site-packages/aiogram/client/bot.py", line 478, in __call__

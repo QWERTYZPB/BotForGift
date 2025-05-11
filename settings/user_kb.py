@@ -112,17 +112,33 @@ async def show_event_kb(event_id: int):
     ).as_markup()
     
 
-def show_event_web_kb(event_id):
-    print(f"{config.WEBHOOK_URL}webapp?event_id={event_id}")
-    return InlineKeyboardMarkup(row_width=1,
+def show_event_web_kb(url):
+
+    return InlineKeyboardMarkup(
         inline_keyboard=[
             [
-                # TODO: MINIAPPS
-                # https://core.telegram.org/bots/webapps#direct-link-mini-apps
-                InlineKeyboardButton(text='Учавствую', web_app=WebAppInfo(url=f"https://google.com"))
+                InlineKeyboardButton(
+                    text='Учавствую', 
+                    url=url
+                    # WebAppInfo(url
+                    )
             ]
-        ])
+        ]
+        )
 
+
+
+def show_private_chat_web_app(event_id):
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text='Учавствую', 
+                    url=WebAppInfo(url=f'https://{config.HOST_URL}/?eventId={event_id}')
+                    )
+            ]
+        ]
+        )
 
 
 

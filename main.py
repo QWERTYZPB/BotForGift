@@ -14,7 +14,7 @@ from settings import scheduler
 
 
 # from QR_codes import qr_router
-
+# AgACAgQAAxkBAAIBUmgepvOdW8eKStDcirfnZtKOY98bAALhxDEbsST4UDhSxmDukigqAQADAgADeQADNgQ
 
 async def main():
 

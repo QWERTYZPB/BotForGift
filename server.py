@@ -105,7 +105,6 @@ async def check_sub(userID, EventId):
 
 
     if await server_utils.user_tickets_not_in_event(user, event) and result['allSubscribed']: 
-        print('yes')
         ticket = await req.add_ticket(
             user_id=user.user_id,
             event_id=int(EventId),  # Добавляем event_id

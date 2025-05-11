@@ -30,13 +30,6 @@ router = Router()
 
 @router.message(CommandStart())
 async def start_bot(message: types.Message, command: CommandObject):
-
-    await message.answer(
-        lexicon.START_TEXT, 
-        reply_markup=user_kb.main_reply()
-    )
-
-
     try:
         await add_user(
             user_id=message.from_user.id,
@@ -45,6 +38,59 @@ async def start_bot(message: types.Message, command: CommandObject):
         )
     except Exception:
         lg.warning(f'FAILED TO ADD USER IN START u_id:{message.from_user.id}')
+    
+
+    
+    if command.args:
+        try: 
+            event_id = int(command.args)
+
+            event = await req.get_event(event_id)
+        
+        
+            user_count = 0
+            win_count = None
+            raffle_data = None
+            message: types.Message = None
+            if event.user_event_ids:
+                user_count = len(event.user_event_ids.split(','))
+            
+            win_count = event.win_count
+            raffle_data = event.end_date.strftime("%d.%m.%Y, %H:%M")
+
+            if event.media:
+                message = await message.answer_photo(
+                    photo=event.media,
+                    caption=lexicon.EVENT_TEXT.format(
+                    name=event.name,
+                    description=event.description or '',
+                    users_count=user_count,
+                    win_count=win_count,
+                    raffle_date=raffle_data
+                    ),
+                    reply_markup= user_kb.show_private_chat_web_app(event.id)
+                )
+            else:
+                message = await message.answer(
+                    text=lexicon.EVENT_TEXT.format(
+                    name=event.name,
+                    description=event.description or '',
+                    users_count=user_count,
+                    win_count=win_count,
+                    raffle_date=raffle_data
+                    ),
+                    reply_markup= user_kb.show_private_chat_web_app(event.id)
+                )
+        except:
+            pass
+        
+
+    await message.answer(
+        lexicon.START_TEXT, 
+        reply_markup=user_kb.main_reply()
+    )
+
+
     
 
 
@@ -378,6 +424,19 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
         return
     
 
+    # await cb.message.answer(
+    #             text=lexicon.EVENT_TEXT.format(
+    #             name=event.name,
+    #             description=event.description or '',
+    #             users_count=1,
+    #             win_count=1,
+    #             raffle_date=datetime.now().strftime('%d/%m/%Y, %H:%M:%S')
+    #             ),
+    #             reply_markup= user_kb.show_event_web_kb(event.id)
+    #         )
+
+
+    
     for channel_id in event.channel_event_ids.split(','):
 
         # try:
@@ -392,6 +451,9 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
             raffle_data = event.end_date.strftime("%d.%m.%Y, %H:%M")
 
 
+            webapp_url = 'https://t.me/' + (await bot.get_me()).username + f'?start={event.id}'
+
+
             if event.media:
                 message = await bot.send_photo(
                     chat_id=channel_id,
@@ -403,7 +465,7 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
                     win_count=win_count,
                     raffle_date=raffle_data
                     ),
-                    reply_markup= user_kb.show_event_web_kb(event.id)
+                    reply_markup= user_kb.show_event_web_kb(event.id, url=webapp_url)
                 )
             else:
                 message = await bot.send_message(
@@ -415,7 +477,7 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
                     win_count=win_count,
                     raffle_date=raffle_data
                     ),
-                    reply_markup= user_kb.show_event_web_kb(event.id)
+                    reply_markup= user_kb.show_event_web_kb(event.id, url=webapp_url)
                 )
             if message:
                 event_message_ids = ''
@@ -434,7 +496,7 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
 
         # except Exception as e:
         #     print(e)
-
+    
 
 
 

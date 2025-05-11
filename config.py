@@ -19,7 +19,8 @@ BOT_TOKEN = env('BOT_TOKEN')
 BOT_URL = env('BOT_URL')
 
 SERVER_IP = env('SERVER_IP')
-WEBHOOK_URL = 'https://'+SERVER_IP
+
+HOST_URL = env('HOST_URL')
 
 
 
