@@ -255,7 +255,7 @@ async def edit_input(message: types.Message, state: FSMContext):
     if action == 'name':
         await req.update_event(
             event_id=event_id,
-            name=message.html_text
+            name=message.md_text
         )
         
         await message.answer('Данные обновлены!', reply_markup=user_kb.back_to_event(event_id))
