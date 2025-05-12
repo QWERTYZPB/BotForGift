@@ -83,8 +83,12 @@ async def start_bot(message: types.Message, command: CommandObject):
                     ),
                     reply_markup= user_kb.show_private_chat_web_app(event.id)
                 )
+
+            
         except Exception as e:
             lg.error(f"ERROR WHILE PARSING EVENT: {e}")
+        
+        return
         
     # print(message)
 
@@ -568,3 +572,74 @@ async def channel_add(cb: types.CallbackQuery, state: FSMContext):
     # await state.update_data(event_id=event_id)
 
     # await cb.message.answer('Перешлите сообш')
+
+
+@router.message(F.chat_shared)
+async def handle_chat_selection(message: types.Message, bot: config.Bot):
+    chat_shared = message.chat_shared  # Получаем объект ChatShared из сообщения
+    try:
+        chat = await bot.get_chat(chat_id=chat_shared.chat_id)
+    except:
+        await message.answer('Бота нет в данном чате/канале, сначала добавьте его и предоставьте права администратора!', 
+                             reply_markup=user_kb.back_to_menu())
+        return
+    
+    
+    chat_username= chat.username
+    chat_title = chat.title
+
+    print(chat_username)
+    if not chat_username:
+        await message.answer('Невозможно добавить канал/чат без username!',reply_markup=user_kb.back_to_menu())
+        return
+    
+    user = await req.get_user(message.from_user.id)
+
+    if str(chat_shared.chat_id) in user.channel_ids.split(','):
+        await message.answer('Канал уже добавлен!',reply_markup=user_kb.back_to_menu())
+        return
+        
+
+    if chat_shared.request_id == 1:
+        # Логика для добавления группы
+        chat_id = chat_shared.chat_id
+
+        await req.add_channel(
+            channel_id=chat_id,
+            name=chat_title,
+            url='https://t.me/' + chat_username
+        )
+
+        await req.update_user(
+            user_id=message.from_user.id,
+            channel_ids=user.channel_ids + ',' + str(chat_id)
+        )
+
+        await message.answer(f"Выбрана группа: {chat_title} \nID: {chat_id}",reply_markup=user_kb.back_to_menu())
+
+    elif chat_shared.request_id == 2:
+        # Логика для добавления канала
+        chat_id = chat_shared.chat_id
+
+        await req.add_channel(
+            channel_id=chat_id,
+            name=chat_title,
+            url='https://t.me/' + chat_username
+        )
+        await req.update_user(
+            user_id=message.from_user.id,
+            channel_ids=user.channel_ids + ',' + str(chat_id)
+        )
+
+        await message.answer(f"Выбран канал: {chat_title} \nID: {chat_id}",reply_markup=user_kb.back_to_menu())
+
+# # Хендлер для добавления канала
+# @router.message(F.request_chat.request_id == 2))
+# async def handle_channel_selection(event: types.ChatShared):
+#     chat_id = event.chat_id
+#     # Здесь можно добавить логику обработки канала
+#     await event.answer(
+#         f"Вы выбрали канал с ID: {chat_id}",
+#         show_alert=True
+#     )
+

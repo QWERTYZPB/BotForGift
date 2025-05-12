@@ -41,21 +41,7 @@ Traceback (most recent call last):
   File "/home/pba/Desktop/work/work/WorkWithAnton/SuperGiftBot/bot/venv/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 43, in call
     return await wrapped()
            ^^^^^^^^^^^^^^^
-  File "/home/pba/Desktop/work/work/WorkWithAnton/SuperGiftBot/bot/handlers/user_handler.py", line 409, in confirm_sending
-    message = await bot.send_message(
-              ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/pba/Desktop/work/work/WorkWithAnton/SuperGiftBot/bot/venv/lib/python3.12/site-packages/aiogram/client/bot.py", line 2850, in send_message
-    return await self(call, request_timeout=request_timeout)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/pba/Desktop/work/work/WorkWithAnton/SuperGiftBot/bot/venv/lib/python3.12/site-packages/aiogram/client/bot.py", line 478, in __call__
-    return await self.session(self, method, timeout=request_timeout)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/pba/Desktop/work/work/WorkWithAnton/SuperGiftBot/bot/venv/lib/python3.12/site-packages/aiogram/client/session/base.py", line 254, in __call__
-    return cast(TelegramType, await middleware(bot, method))
-                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/pba/Desktop/work/work/WorkWithAnton/SuperGiftBot/bot/venv/lib/python3.12/site-packages/aiogram/client/session/aiohttp.py", line 185, in make_request
-    response = self.check_response(
-               ^^^^^^^^^^^^^^^^^^^^
-  File "/home/pba/Desktop/work/work/WorkWithAnton/SuperGiftBot/bot/venv/lib/python3.12/site-packages/aiogram/client/session/base.py", line 120, in check_response
-    raise TelegramBadRequest(method=method, message=description)
-aiogram.exceptions.TelegramBadRequest: Telegram server says - Bad Request: BUTTON_TYPE_INVALID
+  File "/home/pba/Desktop/work/work/WorkWithAnton/SuperGiftBot/bot/handlers/user_handler.py", line 585, in handle_chat_selection
+    chat_username= chat.username
+                   ^^^^
+UnboundLocalError: cannot access local variable 'chat' where it is not associated with a value

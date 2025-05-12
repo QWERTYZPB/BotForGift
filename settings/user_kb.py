@@ -87,7 +87,6 @@ async def show_user_channels(channels, event_id):
         ).as_markup()
     
     return InlineKeyboardBuilder().row(
-            InlineKeyboardButton(text='Добавить канал', callback_data=f'user_channel_add_{event_id}'),
             InlineKeyboardButton(text='Назад', callback_data=f'user_event_show_{event_id}'),
             width=2
         ).as_markup()
