@@ -15,7 +15,6 @@ from datetime import datetime, timedelta
 async def add_user(
     user_id: int,
     username: Optional[str] = None,
-    referrer_id: Optional[int] = None,
     **kwargs
 ) -> Optional[User]:
     """
@@ -32,17 +31,11 @@ async def add_user(
     try:
         async with async_session() as session:
             # Проверка существования реферера
-            if referrer_id:
-                referrer = await session.get(User, referrer_id)
-                if not referrer:
-                    print(f"Реферер с ID {referrer_id} не найден")
-                    return None
-
+            
             # Создание объекта пользователя
             new_user = User(
                 user_id=user_id,
                 username=username,
-                referrer_id=referrer_id,
                 created_at=datetime.now(),
                 **kwargs
             )
@@ -167,8 +160,7 @@ async def generate_ticket_number(event_id: int, user_id: int) -> Optional[str]:
             # Генерируем уникальный номер
             new_number = generate_ticket()
             tickets = [i.number for i in await get_tickets()]
-            print(tickets)
-
+            
             while True:
                 if new_number not in tickets:
                     break

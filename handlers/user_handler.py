@@ -8,7 +8,7 @@ from aiogram.fsm.context import FSMContext
 import logging as lg
 from datetime import datetime
 
-from settings import user_kb, lexicon, UserStates
+from settings import user_kb, lexicon, UserStates, request_utils
 from database.req import add_user
 from database import req
 import config
@@ -32,21 +32,15 @@ router = Router()
 
 @router.message(CommandStart())
 async def start_bot(message: types.Message, command: CommandObject):
-    try:
-        await add_user(
-            user_id=message.from_user.id,
-            username=message.from_user.username,
-            fullname=message.from_user.full_name
-        )
-    except Exception:
-        lg.warning(f'FAILED TO ADD USER IN START u_id:{message.from_user.id}')
-    
-
     
     if command.args:
         try:
             referrer_id, eventId = command.args.split('-')
             referrer = await req.get_user(int(referrer_id))
+
+            if referrer_id == str(message.from_user.id):
+                await message.answer('Вы не можете пригласить самого себя!')
+                return
             
             users_referrers_ids=[]
             pre_users_referrers_ids = [i.referrals for i in await req.get_users() if i.referrals]
@@ -61,8 +55,51 @@ async def start_bot(message: types.Message, command: CommandObject):
                     await message.answer('Вы уже были приглашены пользователем!')
                     return
             
-            # event = 
-            # TODO: Сделать обработку добавления реферала и реферера
+            event = await req.get_event(int(eventId)) 
+            event_channels = event.channel_event_ids.split(',')
+            c = 0
+            for channel_id in event_channels:
+                res = request_utils.check_subscription(int(referrer_id), channel_id, config.BOT_TOKEN)
+                if res:
+                    c+=1
+
+            if not c == len(event_channels):
+                await message.answer('Вы не подписанны на все каналы! Подпишитесь и снова перейдите по реферальной сслыке', reply_markup= user_kb.show_private_chat_web_app(event_id))
+                return
+            
+            if referrer.referrals:
+                await req.update_user(
+                    user_id=int(referrer_id),
+                    referrals=referrer.referrals + ',' + str(message.from_user.id) 
+                )
+            else:
+                await req.update_user(
+                    user_id=int(referrer_id),
+                    referrals=str(message.from_user.id) 
+                )
+
+            await req.generate_ticket_number(user_id=int(referrer_id), event_id=int(eventId))
+            await req.generate_ticket_number(user_id=int(referrer_id), event_id=int(eventId))
+
+            await add_user(
+                user_id=message.from_user.id,
+                username=message.from_user.username,
+                fullname=message.from_user.full_name,
+                referrer=referrer.user_id
+            )
+
+
+
+            await message.bot.send_message(chat_id=referrer_id, text=f'Вы получили 2 тикета за приглашенного пользователя на событие: {event.name} !')
+
+            await message.answer(
+                lexicon.START_TEXT, 
+                reply_markup=user_kb.main_reply()
+            )
+
+            return
+
+            
 
 
         except:
@@ -112,7 +149,17 @@ async def start_bot(message: types.Message, command: CommandObject):
             lg.error(f"ERROR WHILE PARSING EVENT: {e}")
         
         return
-        
+    try:
+        await add_user(
+            user_id=message.from_user.id,
+            username=message.from_user.username,
+            fullname=message.from_user.full_name
+        )
+    except Exception:
+        lg.warning(f'FAILED TO ADD USER IN START u_id:{message.from_user.id}')
+    
+
+
     # print(message)
 
     await message.answer(
