@@ -1,5 +1,7 @@
 from aiogram import Router, F, types
 from aiogram.filters import CommandStart, CommandObject
+from aiogram.enums import MessageEntityType, ParseMode
+from html import escape
 
 from aiogram.fsm.context import FSMContext
 
@@ -251,11 +253,16 @@ async def edit_input(message: types.Message, state: FSMContext):
     action = data['action']
     event_id = int(data['event_id'])
 
+    formatted_text = apply_html_formatting(
+        text=message.text or "", 
+        entities=message.entities or []
+    )
+
 
     if action == 'name':
         await req.update_event(
             event_id=event_id,
-            name=message.md_text
+            name=formatted_text
         )
         
         await message.answer('Данные обновлены!', reply_markup=user_kb.back_to_event(event_id))
@@ -263,7 +270,7 @@ async def edit_input(message: types.Message, state: FSMContext):
     elif action == 'description':
         await req.update_event(
             event_id=event_id,
-            description=message.text
+            description=formatted_text
         )
     
         await message.answer('Данные обновлены!', reply_markup=user_kb.back_to_event(event_id))
@@ -502,7 +509,45 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
 
 
 
-
+def apply_html_formatting(text: str, entities: list[types.MessageEntity]) -> str:
+    """
+    Преобразует сущности сообщения в HTML-теги.
+    """
+    # Экранируем спецсимволы в тексте
+    escaped_text = escape(text)
+    
+    # Сортируем сущности по убыванию offset, чтобы не сломать индексы
+    sorted_entities = sorted(entities, key=lambda e: -e.offset)
+    
+    # Применяем форматирование
+    for entity in sorted_entities:
+        start = entity.offset
+        end = entity.offset + entity.length
+        fragment = escaped_text[start:end]
+        
+        match entity.type:
+            case MessageEntityType.BOLD:
+                replacement = f"<b>{fragment}</b>"
+            case MessageEntityType.ITALIC:
+                replacement = f"<i>{fragment}</i>"
+            case MessageEntityType.CODE:
+                replacement = f"<code>{fragment}</code>"
+            case MessageEntityType.PRE:
+                replacement = f"<pre>{fragment}</pre>"
+            case MessageEntityType.UNDERLINE:
+                replacement = f"<u>{fragment}</u>"
+            case MessageEntityType.STRIKETHROUGH:
+                replacement = f"<s>{fragment}</s>"
+            case MessageEntityType.TEXT_LINK:
+                replacement = f'<a href="{entity.url}">{fragment}</a>'
+            case MessageEntityType.CUSTOM_EMOJI:
+                replacement = f'<tg-emoji emoji-id="{entity.custom_emoji_id}">{fragment}</tg-emoji>'
+            case _:
+                replacement = fragment
+        
+        escaped_text = escaped_text[:start] + replacement + escaped_text[end:]
+    
+    return escaped_text
 
 
 
