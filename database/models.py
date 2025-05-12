@@ -33,8 +33,7 @@ class User(Base):
     username: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     fullname: Mapped[str] = mapped_column(String(200), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
-    referrer_id: Mapped[Optional[int]] = mapped_column(BigInteger, ForeignKey("users.user_id"))
-    
+
     # Отношения
     referrals: Mapped[str] = mapped_column(String, nullable=True)
     referrer: Mapped[int] = mapped_column(Integer, nullable=True)

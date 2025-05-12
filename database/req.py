@@ -79,6 +79,15 @@ async def get_user(user_id: int) -> Optional[User]:
         )
         return result.scalars().one()
     
+async def get_users() -> List[User]:
+    async with async_session() as session:
+        result = await session.execute(
+            select(User) 
+        )
+        return result.scalars().all()
+    
+
+
 
 async def update_user(user_id: int, **data) -> Optional[User]:
     try:

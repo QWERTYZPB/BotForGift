@@ -44,6 +44,29 @@ async def start_bot(message: types.Message, command: CommandObject):
 
     
     if command.args:
+        try:
+            referrer_id, eventId = command.args.split('-')
+            referrer = await req.get_user(int(referrer_id))
+            
+            users_referrers_ids=[]
+            pre_users_referrers_ids = [i.referrals for i in await req.get_users() if i.referrals]
+            
+            for user_referrers_ids in pre_users_referrers_ids:
+                for referrer_id in user_referrers_ids.split(','):
+                    users_referrers_ids.append(referrer_id)
+
+
+            if referrer.referrals:
+                if str(message.from_user.id) in users_referrers_ids:
+                    await message.answer('Вы уже были приглашены пользователем!')
+                    return
+            
+            # event = 
+            # TODO: Сделать обработку добавления реферала и реферера
+
+
+        except:
+            pass
         try: 
             event_id = int(command.args)
 
@@ -584,7 +607,7 @@ async def handle_chat_selection(message: types.Message, bot: config.Bot):
                              reply_markup=user_kb.back_to_menu())
         return
     
-    
+
     chat_username= chat.username
     chat_title = chat.title
 
