@@ -13,8 +13,7 @@ from handlers import admin_handler, user_handler
 from settings import scheduler
 
 
-# from QR_codes import qr_router
-# AgACAgQAAxkBAAIBUmgepvOdW8eKStDcirfnZtKOY98bAALhxDEbsST4UDhSxmDukigqAQADAgADeQADNgQ
+# testimageid: AgACAgQAAxkBAAIBUmgepvOdW8eKStDcirfnZtKOY98bAALhxDEbsST4UDhSxmDukigqAQADAgADeQADNgQ
 
 async def main():
 
@@ -28,7 +27,7 @@ async def main():
     # dp.include_router(user_router.router)
     # dp.include_router(qr_router.router)
 
-    # await scheduler.archiever.start_scheduler()
+    await scheduler.AsyncScheduler.start_scheduler(config.bot)
 
     @config.dp.error()
     async def error_handler(event: ErrorEvent):
@@ -57,14 +56,3 @@ if __name__ == "__main__":
         print("Interrupted by user")
 
 
-
-
-
-
-#TODO: выбор акции со стороны пользователя, после чего показывается QR
-#TODO: cчет количества активированных и оставшихся QR в статистике акций
-#TODO: обновлять в базе данных акций количество QR кодов, которые остались на мероприятие + добавить в эту базу данных колонку с вошедшими на мероприятие пользователями (обновить базу)
-#TODO: при сканировании QR кода записывать пользователя на меропиятие + написать тому, кто сканирует QR: "Такой-то пользователь прошёл на такое-то мероприятие" + сделать проверку на повторное прохождение со стороны пользователя 
-#TODO: сделать команду "Статистика" в админской панели
-#TODO: Сделать появление ВСЕХ сообщений через edit_text
-#TODO: Закончить кнопку "Редактирование" в панели админа

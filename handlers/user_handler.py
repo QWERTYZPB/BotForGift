@@ -47,7 +47,8 @@ async def start_bot(message: types.Message, command: CommandObject):
             
             for user_referrers_ids in pre_users_referrers_ids:
                 for referrer_id in user_referrers_ids.split(','):
-                    users_referrers_ids.append(referrer_id)
+                    if referrer_id!='':
+                        users_referrers_ids.append(referrer_id)
 
 
             if referrer.referrals:
@@ -58,13 +59,17 @@ async def start_bot(message: types.Message, command: CommandObject):
             event = await req.get_event(int(eventId)) 
             event_channels = event.channel_event_ids.split(',')
             c = 0
+            if '' in event_channels:
+                c-=1
+            
             for channel_id in event_channels:
-                res = request_utils.check_subscription(int(referrer_id), channel_id, config.BOT_TOKEN)
-                if res:
-                    c+=1
+                if channel_id != '':
+                    res = request_utils.check_subscription(int(referrer_id), channel_id, config.BOT_TOKEN)
+                    if res:
+                        c+=1
 
             if not c == len(event_channels):
-                await message.answer('Вы не подписанны на все каналы! Подпишитесь и снова перейдите по реферальной сслыке', reply_markup= user_kb.show_private_chat_web_app(event_id))
+                await message.answer('Вы не подписанны на все каналы! Подпишитесь и снова перейдите по реферальной сслыке', reply_markup= user_kb.show_private_chat_web_app(event_id, event.end_date))
                 return
             
             if referrer.referrals:
@@ -78,8 +83,24 @@ async def start_bot(message: types.Message, command: CommandObject):
                     referrals=str(message.from_user.id) 
                 )
 
-            await req.generate_ticket_number(user_id=int(referrer_id), event_id=int(eventId))
-            await req.generate_ticket_number(user_id=int(referrer_id), event_id=int(eventId))
+            ticket1 = await req.generate_ticket_number(user_id=int(referrer_id), event_id=int(eventId))
+            ticket2 = await req.generate_ticket_number(user_id=int(referrer_id), event_id=int(eventId))
+
+            if not event.tickets_event:
+                event.tickets_event = ''
+            
+            if not referrer.tickets_ids:
+                referrer.tickets_ids = ''
+
+            await req.update_event(
+                event_id=int(eventId),
+                tickets_event=event.tickets_event+str(ticket1)+','+str(ticket2.id)+','
+            )
+
+            await req.update_user(
+                user_id=referrer.user_id, 
+                tickets_ids=referrer.tickets_ids+str(ticket1)+','+str(ticket2.id)+','
+                )
 
             await add_user(
                 user_id=message.from_user.id,
@@ -99,17 +120,16 @@ async def start_bot(message: types.Message, command: CommandObject):
 
             return
 
-            
-
-
         except:
             pass
+
+
         try: 
             event_id = int(command.args)
 
             event = await req.get_event(event_id)
         
-        
+
             user_count = 0
             win_count = None
             raffle_data = None
@@ -130,7 +150,7 @@ async def start_bot(message: types.Message, command: CommandObject):
                     win_count=win_count,
                     raffle_date=raffle_data
                     ),
-                    reply_markup= user_kb.show_private_chat_web_app(event.id)
+                    reply_markup= user_kb.show_private_chat_web_app(event.id, event.end_date)
                 )
             else:
                 await message.answer(
@@ -141,7 +161,7 @@ async def start_bot(message: types.Message, command: CommandObject):
                     win_count=win_count,
                     raffle_date=raffle_data
                     ),
-                    reply_markup= user_kb.show_private_chat_web_app(event.id)
+                    reply_markup= user_kb.show_private_chat_web_app(event.id, event.end_date)
                 )
 
             
@@ -577,59 +597,58 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
     
     for channel_id in event.channel_event_ids.split(','):
 
-        # try:
-            user_count = 0
-            win_count = None
-            raffle_data = None
-            message: types.Message = None
-            if event.user_event_ids:
-                user_count = len(event.user_event_ids.split(','))
-            
-            win_count = event.win_count
-            raffle_data = event.end_date.strftime("%d.%m.%Y, %H:%M")
+        user_count = 0
+        win_count = None
+        raffle_data = None
+        message: types.Message = None
+        if event.user_event_ids:
+            user_count = len(event.user_event_ids.split(','))
+        
+        win_count = event.win_count
+        raffle_data = event.end_date.strftime("%d.%m.%Y, %H:%M")
 
 
-            webapp_url = 'https://t.me/' + (await bot.get_me()).username + f'?start={event.id}'
+        webapp_url = 'https://t.me/' + (await bot.get_me()).username + f'?start={event.id}'
 
 
-            if event.media:
-                message = await bot.send_photo(
-                    chat_id=channel_id,
-                    photo=event.media,
-                    caption=lexicon.EVENT_TEXT.format(
-                    name=event.name,
-                    description=event.description or '',
-                    users_count=user_count,
-                    win_count=win_count,
-                    raffle_date=raffle_data
-                    ),
-                    reply_markup= user_kb.show_event_web_kb(url=webapp_url)
-                )
+        if event.media:
+            message = await bot.send_photo(
+                chat_id=channel_id,
+                photo=event.media,
+                caption=lexicon.EVENT_TEXT.format(
+                name=event.name,
+                description=event.description or '',
+                users_count=user_count,
+                win_count=win_count,
+                raffle_date=raffle_data
+                ),
+                reply_markup= user_kb.show_event_web_kb(url=webapp_url)
+            )
+        else:
+            message = await bot.send_message(
+                chat_id=channel_id,
+                text=lexicon.EVENT_TEXT.format(
+                name=event.name,
+                description=event.description or '',
+                users_count=user_count,
+                win_count=win_count,
+                raffle_date=raffle_data
+                ),
+                reply_markup= user_kb.show_event_web_kb(url=webapp_url)
+            )
+        if message:
+            event_message_ids = ''
+            if not event.message_ids:
+                event_message_ids = channel_id+":"+str(message.message_id)
+            elif not event.message_ids  == '' :
+                event_message_ids += channel_id+":"+str(message.message_id)
             else:
-                message = await bot.send_message(
-                    chat_id=channel_id,
-                    text=lexicon.EVENT_TEXT.format(
-                    name=event.name,
-                    description=event.description or '',
-                    users_count=user_count,
-                    win_count=win_count,
-                    raffle_date=raffle_data
-                    ),
-                    reply_markup= user_kb.show_event_web_kb(url=webapp_url)
-                )
-            if message:
-                event_message_ids = ''
-                if not event.message_ids:
-                    event_message_ids = channel_id+":"+str(message.message_id)
-                elif not event.message_ids  == '' :
-                    event_message_ids += channel_id+":"+str(message.message_id)
-                else:
-                    event_message_ids = ','.join(list(set(event_message_ids.split(',').append(channel_id+":"+str(message.message_id)))))
+                event_message_ids = ','.join(list(set(event_message_ids.split(',').append(channel_id+":"+str(message.message_id)))))
 
-                await req.update_event(
-                    event_id=int(event_id),
-                    message_ids=event_message_ids
-                )
+            await req.update_event(
+                event_id=int(event_id),
+                message_ids=event_message_ids
+            )
 
     await cb.message.edit_text('Успешно разослано по всем каналам!', reply_markup=user_kb.back_to_event(event_id))
 

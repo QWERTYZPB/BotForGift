@@ -13,6 +13,7 @@ from typing import List
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from database import req
+import datetime
 import config
 
 
@@ -46,7 +47,7 @@ async def create_user_raffles(events: List[str]):
     for id in events:
         try:
             event = await req.get_event(int(id))
-            if event and event.is_active:
+            if event:
                 btns.append(
                     InlineKeyboardButton(
                         text=event.name,
@@ -133,18 +134,45 @@ def show_event_web_kb(url):
         )
 
 
+def show_event_results_web_kb(url):
 
-def show_private_chat_web_app(event_id):
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
+                InlineKeyboardButton(
+                    text='Результаты', 
+                    url=url
+                    )
+            ]
+        ]
+        )
+
+
+def show_private_chat_web_app(event_id, event_end_date: datetime.datetime):
+    btn = []
+    
+    if datetime.datetime.now() > event_end_date:
+        btn = [
+                InlineKeyboardButton(
+                    text='Результаты', 
+                    web_app=WebAppInfo(url=f'https://{config.HOST_URL}/results?eventId={event_id}')
+                    )
+            ]
+    else:
+        btn = [
                 InlineKeyboardButton(
                     text='Учавствую', 
                     web_app=WebAppInfo(url=f'https://{config.HOST_URL}/?eventId={event_id}')
                     )
             ]
+
+    
+    return InlineKeyboardMarkup(
+        inline_keyboard=
+        [
+            btn
         ]
-        )
+    )
 
 
 

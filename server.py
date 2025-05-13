@@ -68,19 +68,19 @@ async def get_winners(eventId):
 
 
 
-@app.route(APP_PREFIX+'/addTicket/<UserId>-<eventId>')
-async def create_new_ticket(userId, eventId):
+# @app.route(APP_PREFIX+'/addTicket/<UserId>-<eventId>')
+# async def create_new_ticket(userId, eventId):
     
-    user = await req.get_user(int(userId))
-    event = await req.get_event(int(eventId))
+#     user = await req.get_user(int(userId))
+#     event = await req.get_event(int(eventId))
 
 
-    if user and eventId:
-        await req.generate_ticket_number(event.id, user.user_id)
+#     if user and eventId:
+#         await req.generate_ticket_number(event.id, user.user_id)
 
-        return {'ok': True}
+#         return {'ok': True}
     
-    return {'ok': False}
+#     return {'ok': False}
 
 
 
@@ -120,9 +120,9 @@ async def check_sub(userID, EventId):
                 user_event_ids=str(userID)
             )
         
-        await req.generate_ticket_number(event.id, user.user_id)
+        ticket = await req.generate_ticket_number(event.id, user.user_id)
         
-        # print(ticket)
+        print(ticket)
 
         if not event.tickets_event:
             event.tickets_event = ''

@@ -140,7 +140,7 @@ async def add_ticket(
 
 
 
-async def generate_ticket_number(event_id: int, user_id: int) -> Optional[str]:
+async def generate_ticket_number(event_id: int, user_id: int) -> Optional[Ticket]:
     """
     Генерирует уникальный номер билета для указанного события и пользователя.
     Формат: XXXXXXgenerate
@@ -176,7 +176,8 @@ async def generate_ticket_number(event_id: int, user_id: int) -> Optional[str]:
             
             session.add(ticket)
             await session.commit()
-            return new_number
+
+            return ticket
 
     except SQLAlchemyError as e:
         print(f"Ошибка генерации билета: {e}")
@@ -204,6 +205,26 @@ async def get_ticket(ticket_id: int) -> Optional[Ticket]:
     except SQLAlchemyError as e:
         print(f"Error getting ticket: {e}")
         return None
+
+async def update_ticket(id: int, **data) -> Optional[Ticket]:
+    try:
+        async with async_session() as session:
+            ticket = await session.get(Ticket, id)
+            if not ticket:
+                return None
+                
+            for key, value in data.items():
+                setattr(ticket, key, value)
+                
+            await session.commit()
+            await session.refresh(ticket)
+            return ticket
+    except SQLAlchemyError as e:
+        print(f"Error updating user: {e}")
+        await session.rollback()
+        return None
+
+
 
 async def get_tickets() -> List[Ticket]:
     try:
@@ -325,9 +346,7 @@ async def get_active_events() -> List[Event]:
             result = await session.execute(
                 select(Event)
                 .where(Event.is_active == True)
-                .options(
-                    selectinload(Event.channels),
-                    selectinload(Event.users))
+                
             )
             return result.scalars().all()
     except SQLAlchemyError as e:
@@ -338,6 +357,7 @@ async def get_active_events() -> List[Event]:
 async def get_event_winners(event_id: int) -> List[User]:
     async with async_session() as session:
         result = []
+        user_ids = []
 
         event_ = await session.execute(
             select(Event)
@@ -350,8 +370,10 @@ async def get_event_winners(event_id: int) -> List[User]:
         for ticket in event.tickets_event.split(','):
             if not ticket == '':    
                 t = await get_ticket(int(ticket))
-                if t.is_winner:
-                    result.append(await get_user(t.user_id))
+                if t.is_winner and (t.user_id not in user_ids):
+                    user = await get_user(t.user_id)
+                    result.append(user)
+                    user_ids.append(user.user_id)
 
 
         return result
