@@ -6,7 +6,7 @@ from html import escape
 from aiogram.fsm.context import FSMContext
 
 import logging as lg
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from settings import user_kb, lexicon, UserStates, request_utils
 from database.req import add_user
@@ -630,20 +630,6 @@ def apply_html_formatting(text: str, entities: list[types.MessageEntity]) -> str
 """ CHANNEL ADD """
 
 
-@router.callback_query(F.data.startswith('user_channel_add_'))
-async def channel_add(cb: types.CallbackQuery, state: FSMContext):
-
-    event_id = int(cb.data.split('_')[-1])
-
-    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    # TODO: ПОЙМАТЬ ID ЧАТА С КЛАВИАТУРЫ КАК В MAIN MENU
-    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-    # await state.update_data(event_id=event_id)
-
-    # await cb.message.answer('Перешлите сообш')
-
-
 @router.message(F.chat_shared)
 async def handle_chat_selection(message: types.Message, bot: config.Bot):
     chat_shared = message.chat_shared  # Получаем объект ChatShared из сообщения
@@ -703,13 +689,116 @@ async def handle_chat_selection(message: types.Message, bot: config.Bot):
 
         await message.answer(f"Выбран канал: {chat_title} \nID: {chat_id}",reply_markup=user_kb.back_to_menu())
 
-# # Хендлер для добавления канала
-# @router.message(F.request_chat.request_id == 2))
-# async def handle_channel_selection(event: types.ChatShared):
-#     chat_id = event.chat_id
-#     # Здесь можно добавить логику обработки канала
-#     await event.answer(
-#         f"Вы выбрали канал с ID: {chat_id}",
-#         show_alert=True
-#     )
 
+
+
+
+
+
+
+
+
+
+
+'''  NEW EVENT  '''
+
+
+@router.message(F.text == 'Новый розыгрыш')
+async def new_event(message: types.Message, state: FSMContext):
+    # Создаем событие
+
+    await message.answer('Введите название розыгрыша:', 
+                         reply_markup=user_kb.back_to_menu())
+    await state.set_state(UserStates.AddEvent.name)
+
+
+@router.message(UserStates.AddEvent.name)
+async def new_event(message: types.Message, state: FSMContext):
+
+    await state.update_data(name=message.text)
+    
+    await message.answer('Введите описание розыгрыша:', 
+                         reply_markup=user_kb.back_to_menu())
+    await state.set_state(UserStates.AddEvent.description)
+
+
+@router.message(UserStates.AddEvent.description)
+async def set_description(message: types.Message, state: FSMContext):
+    await state.update_data(description=message.text)
+    
+    await message.answer(
+        'Введите ID каналов для розыгрыша (через запятую):',
+        reply_markup=user_kb.back_to_menu()
+    )
+    await state.set_state(UserStates.AddEvent.channel_event_ids)
+
+@router.message(UserStates.AddEvent.channel_event_ids)
+async def set_channels(message: types.Message, state: FSMContext):
+    try:
+        # Проверяем корректность ввода ID каналов
+        channels = [int(ch_id.strip()) for ch_id in message.text.split(',')]
+        await state.update_data(channel_event_ids=channels)
+        
+        await message.answer(
+            'Введите количество победителей:',
+            reply_markup=user_kb.back_to_menu()
+        )
+        await state.set_state(UserStates.AddEvent.win_count)
+        
+    except ValueError:
+        await message.answer('❌ Ошибка! Введите числовые ID каналов через запятую')
+
+@router.message(UserStates.AddEvent.win_count)
+async def set_win_count(message: types.Message, state: FSMContext):
+    if message.text.isdigit() and int(message.text) > 0:
+        await state.update_data(win_count=int(message.text))
+        
+        await message.answer(
+            'Введите дату окончания розыгрыша (ДД.ММ.ГГГГ ЧЧ:ММ):',
+            reply_markup=user_kb.back_to_menu()
+        )
+        await state.set_state(UserStates.AddEvent.end_date)
+    else:
+        await message.answer('❌ Введите корректное число больше 0')
+
+@router.message(UserStates.AddEvent.end_date)
+async def set_end_date(message: types.Message, state: FSMContext):
+    try:
+        # Парсим дату из сообщения
+        date_obj = datetime.strptime(message.text, '%d.%m.%Y %H:%M')
+        
+        # Проверяем что дата в будущем
+        if date_obj <= datetime.now():
+            raise ValueError
+        
+        await state.update_data(end_date=date_obj)
+        
+        # Получаем все данные из состояния
+        data = await state.get_data()
+        
+        await req.create_event(
+            name=data['name'],
+            description=data['description'],
+            channels=
+        )
+        
+        await message.answer(
+            '🎉 Розыгрыш успешно создан!',
+            reply_markup=user_kb.main_menu()
+        )
+        await state.clear()
+        
+    except ValueError:
+        await message.answer('❌ Неверный формат даты или дата в прошлом! Используйте формат ДД.ММ.ГГГГ ЧЧ:ММ')
+
+    # event = await req.create_event(
+    #     name="Event X",
+    #     description="Test Event X",
+    #     channel_event_ids= ','.join(['-1002141057588', '-1001744551956']),
+    #     win_count=5,
+    #     start_date=datetime.now(),
+    #     end_date=datetime.now() + timedelta(days=7),
+    #     is_active=True,
+    #     owner_id=1060834219  # Используем существующий user_id
+    # )
+    # print(f"Создано событие: event x")

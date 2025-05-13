@@ -102,15 +102,26 @@ async def check_sub(userID, EventId):
     
     result = await server_utils.get_json_subscriptions(bot, int(userID), channels)
     # print(result)
+    users_in_event = event.user_event_ids.split(',') if event.user_event_ids else []
 
 
+    if await server_utils.user_tickets_not_in_event(user, event)\
+          and result['allSubscribed'] \
+            and (userID not in users_in_event): 
 
-    if await server_utils.user_tickets_not_in_event(user, event) and result['allSubscribed']: 
-        ticket = await req.add_ticket(
-            user_id=user.user_id,
-            event_id=int(EventId),  # Добавляем event_id
-            number = await req.generate_ticket_number(event.id, user.user_id)
-        )
+        if event.user_event_ids:
+            await req.update_event(
+                event_id=event.id,
+                user_event_ids=event.user_event_ids + ',' + str(userID)
+            )
+        else:
+            await req.update_event(
+                event_id=event.id,
+                user_event_ids=str(userID)
+            )
+        
+        await req.generate_ticket_number(event.id, user.user_id)
+        
         # print(ticket)
 
         if not event.tickets_event:

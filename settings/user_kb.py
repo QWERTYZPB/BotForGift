@@ -22,7 +22,7 @@ def main_reply():
             [
                 KeyboardButton(text='Розыгрыши'),
                 KeyboardButton(text='Новый розыгрыш'),
-                KeyboardButton(text='Подписки')
+                # KeyboardButton(text='Подписки')
             ],
             [
                 KeyboardButton(text='Добавить группу', request_chat=KeyboardButtonRequestChat(request_id=1, chat_is_channel=False)),

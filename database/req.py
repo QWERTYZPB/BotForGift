@@ -300,7 +300,6 @@ async def update_channel(channel_id: int, **data) -> Optional[Channel]:
 async def create_event(
     name: str,
     description: Optional[str] = None,
-    channels: List[Channel] = None,
     **kwargs
 ) -> Optional[Event]:
     try:
@@ -310,10 +309,7 @@ async def create_event(
                 description=description,
                 **kwargs
             )
-            
-            if channels:
-                event.channels.extend(channels)
-                
+                            
             session.add(event)
             await session.commit()
             await session.refresh(event)
@@ -449,19 +445,5 @@ async def delete_event(event_id: int) -> bool:
     except Exception as e:
         print(f"Неожиданная ошибка: {e}")
         return False
-
-
-    # Создаем событие
-    event = await create_event(
-        name="Event X",
-        description="Test Event X",
-        channel_event_ids= ','.join(['-1002141057588', '-1001744551956']),
-        win_count=5,
-        start_date=datetime.now(),
-        end_date=datetime.now() + timedelta(days=7),
-        is_active=True,
-        owner_id=1060834219  # Используем существующий user_id
-    )
-    print(f"Создано событие: event x")
 
 
