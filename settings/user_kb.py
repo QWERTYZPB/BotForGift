@@ -46,7 +46,7 @@ async def create_user_raffles(events: List[str]):
     for id in events:
         try:
             event = await req.get_event(int(id))
-            if event:
+            if event and event.is_active:
                 btns.append(
                     InlineKeyboardButton(
                         text=event.name,
@@ -93,7 +93,7 @@ async def show_user_channels(channels, event_id):
 
 
 
-async def show_event_kb(event_id: int):
+async def show_event_kb(event_id: int, use_captha: bool = False, is_active: bool = True):
     return InlineKeyboardBuilder().row(
         InlineKeyboardButton(text='Название', callback_data=f'edit_event_name_{event_id}'),
         InlineKeyboardButton(text='Медиа', callback_data=f'edit_event_media_{event_id}'),
@@ -105,6 +105,13 @@ async def show_event_kb(event_id: int):
 
         InlineKeyboardButton(text='Рассылка', callback_data=f"send_{event_id}"),
         
+        InlineKeyboardButton(text='Капча ✅', callback_data=f"captcha_disable_{event_id}") if use_captha else \
+        InlineKeyboardButton(text='Капча ❌', callback_data=f"captcha_enable_{event_id}"),
+
+        InlineKeyboardButton(text='Активно ✅', callback_data=f"activeEvent_disable_{event_id}") if is_active else \
+        InlineKeyboardButton(text='Активно ❌', callback_data=f"activeEvent_enable_{event_id}"),
+         
+
         InlineKeyboardButton(text='Назад', callback_data=f"backMain"),
 
         width=3

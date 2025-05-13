@@ -41,7 +41,7 @@ Traceback (most recent call last):
   File "/home/pba/Desktop/work/work/WorkWithAnton/SuperGiftBot/bot/venv/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 43, in call
     return await wrapped()
            ^^^^^^^^^^^^^^^
-  File "/home/pba/Desktop/work/work/WorkWithAnton/SuperGiftBot/bot/handlers/user_handler.py", line 585, in handle_chat_selection
-    chat_username= chat.username
-                   ^^^^
-UnboundLocalError: cannot access local variable 'chat' where it is not associated with a value
+  File "/home/pba/Desktop/work/work/WorkWithAnton/SuperGiftBot/bot/handlers/user_handler.py", line 492, in disable_captcha
+    await cb.message.edit_text('Успешно обновленно!', reply_markup=user_kb.back_to_event(event_id))
+                                                                                         ^^^^^^^^
+NameError: name 'event_id' is not defined

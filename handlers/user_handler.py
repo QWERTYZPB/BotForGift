@@ -236,7 +236,7 @@ async def user_event(cb: types.CallbackQuery):
                     win_count=win_count,
                     raffle_date=raffle_data
                     ),
-                    reply_markup=await user_kb.show_event_kb(event.id)
+                    reply_markup=await user_kb.show_event_kb(event.id, use_captha=event.use_captcha, is_active=event.is_active)
                 )
             else:
                 await cb.message.answer(text=lexicon.EVENT_TEXT.format(
@@ -246,7 +246,7 @@ async def user_event(cb: types.CallbackQuery):
                     win_count=win_count,
                     raffle_date=raffle_data
                 ),
-                    reply_markup=await user_kb.show_event_kb(event.id)
+                    reply_markup=await user_kb.show_event_kb(event.id, use_captha=event.use_captcha, is_active=event.is_active)
                 )
         else:
             await cb.message.answer('Что-то пошло не так...', reply_markup=user_kb.back_to_menu())
@@ -479,6 +479,75 @@ async def change_event_channel(cb: types.CallbackQuery, state: FSMContext):
 
 
 
+@router.callback_query(F.data.startswith('captcha_disable_'))
+async def disable_captcha(cb: types.CallbackQuery):
+    
+    event = await req.get_event(int(cb.data.split('_')[-1]) )
+
+    await req.update_event(
+        event_id=event.id,
+        use_captcha = False
+    )
+
+    await cb.message.edit_text('Успешно обновленно!', reply_markup=user_kb.back_to_event(event.id))
+
+
+
+
+
+@router.callback_query(F.data.startswith('captcha_enable_'))
+async def disable_captcha(cb: types.CallbackQuery):
+    
+    event = await req.get_event(int(cb.data.split('_')[-1]) )
+
+    await req.update_event(
+        event_id=event.id,
+        use_captcha = True
+    )
+
+    await cb.message.edit_text('Успешно обновленно!', reply_markup=user_kb.back_to_event(event.id))
+
+
+
+
+
+
+@router.callback_query(F.data.startswith('activeEvent_disable_'))
+async def disable_captcha(cb: types.CallbackQuery):
+    
+    event = await req.get_event(int(cb.data.split('_')[-1]) )
+
+    await req.update_event(
+        event_id=event.id,
+        is_active = False
+    )
+
+    await cb.message.edit_text('Успешно обновленно!', reply_markup=user_kb.back_to_event(event.id))
+
+
+
+
+
+@router.callback_query(F.data.startswith('activeEvent_enable_'))
+async def disable_captcha(cb: types.CallbackQuery):
+    
+    event = await req.get_event(int(cb.data.split('_')[-1]) )
+
+    await req.update_event(
+        event_id=event.id,
+        is_active = True
+    )
+
+    await cb.message.edit_text('Успешно обновленно!', reply_markup=user_kb.back_to_event(event.id))
+
+
+
+
+
+
+
+
+
 
 
 @router.callback_query(F.data.startswith('send_'))
@@ -504,19 +573,6 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
     if not event.channel_event_ids or event.channel_event_ids == '':
         await cb.message.answer('Нету активных каналов!', reply_markup=user_kb.back_to_event(event_id))
         return
-    
-
-    # await cb.message.answer(
-    #             text=lexicon.EVENT_TEXT.format(
-    #             name=event.name,
-    #             description=event.description or '',
-    #             users_count=1,
-    #             win_count=1,
-    #             raffle_date=datetime.now().strftime('%d/%m/%Y, %H:%M:%S')
-    #             ),
-    #             reply_markup= user_kb.show_event_web_kb(event.id)
-    #         )
-
 
     
     for channel_id in event.channel_event_ids.split(','):
@@ -575,10 +631,8 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
                     message_ids=event_message_ids
                 )
 
+    await cb.message.edit_text('Успешно разослано по всем каналам!', reply_markup=user_kb.back_to_event(event_id))
 
-        # except Exception as e:
-        #     print(e)
-    
 
 
 
@@ -727,26 +781,26 @@ async def set_description(message: types.Message, state: FSMContext):
     await state.update_data(description=message.text)
     
     await message.answer(
-        'Введите ID каналов для розыгрыша (через запятую):',
+        'Введите количество победителей:',
         reply_markup=user_kb.back_to_menu()
     )
-    await state.set_state(UserStates.AddEvent.channel_event_ids)
+    await state.set_state(UserStates.AddEvent.win_count)
 
-@router.message(UserStates.AddEvent.channel_event_ids)
-async def set_channels(message: types.Message, state: FSMContext):
-    try:
-        # Проверяем корректность ввода ID каналов
-        channels = [int(ch_id.strip()) for ch_id in message.text.split(',')]
-        await state.update_data(channel_event_ids=channels)
+# @router.message(UserStates.AddEvent.channel_event_ids)
+# async def set_channels(message: types.Message, state: FSMContext):
+#     try:
+#         # Проверяем корректность ввода ID каналов
+#         channels = [int(ch_id.strip()) for ch_id in message.text.split(',')]
+#         await state.update_data(channel_event_ids=channels)
         
-        await message.answer(
-            'Введите количество победителей:',
-            reply_markup=user_kb.back_to_menu()
-        )
-        await state.set_state(UserStates.AddEvent.win_count)
+#         await message.answer(
+#             'Введите количество победителей:',
+#             reply_markup=user_kb.back_to_menu()
+#         )
+#         await state.set_state(UserStates.AddEvent.win_count)
         
-    except ValueError:
-        await message.answer('❌ Ошибка! Введите числовые ID каналов через запятую')
+#     except ValueError:
+#         await message.answer('❌ Ошибка! Введите числовые ID каналов через запятую')
 
 @router.message(UserStates.AddEvent.win_count)
 async def set_win_count(message: types.Message, state: FSMContext):
@@ -760,6 +814,7 @@ async def set_win_count(message: types.Message, state: FSMContext):
         await state.set_state(UserStates.AddEvent.end_date)
     else:
         await message.answer('❌ Введите корректное число больше 0')
+
 
 @router.message(UserStates.AddEvent.end_date)
 async def set_end_date(message: types.Message, state: FSMContext):
@@ -779,12 +834,12 @@ async def set_end_date(message: types.Message, state: FSMContext):
         await req.create_event(
             name=data['name'],
             description=data['description'],
-            channels=
+            end_date = date_obj
         )
         
         await message.answer(
             '🎉 Розыгрыш успешно создан!',
-            reply_markup=user_kb.main_menu()
+            reply_markup=user_kb.back_to_menu()
         )
         await state.clear()
         
