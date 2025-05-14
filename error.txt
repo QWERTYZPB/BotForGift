@@ -41,7 +41,7 @@ Traceback (most recent call last):
   File "/home/pba/Desktop/work/work/WorkWithAnton/SuperGiftBot/bot/venv/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 43, in call
     return await wrapped()
            ^^^^^^^^^^^^^^^
-  File "/home/pba/Desktop/work/work/WorkWithAnton/SuperGiftBot/bot/handlers/user_handler.py", line 492, in disable_captcha
-    await cb.message.edit_text('Успешно обновленно!', reply_markup=user_kb.back_to_event(event_id))
-                                                                                         ^^^^^^^^
-NameError: name 'event_id' is not defined
+  File "/home/pba/Desktop/work/work/WorkWithAnton/SuperGiftBot/bot/handlers/admin_handler.py", line 140, in confirm_winners
+    event = await req.get_event(int(data['event']))
+                                    ~~~~^^^^^^^^^
+KeyError: 'event'

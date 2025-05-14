@@ -34,3 +34,14 @@ EVENT_WIN_TEXT = """
 
 
 
+
+
+
+ADMIN_ADD_TICKETS_TEXT = '''
+
+Счастливые билеты:
+
+{tickets}
+
+Подтвердите правильность
+'''

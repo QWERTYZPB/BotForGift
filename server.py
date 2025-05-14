@@ -122,7 +122,7 @@ async def check_sub(userID, EventId):
         
         ticket = await req.generate_ticket_number(event.id, user.user_id)
         
-        print(ticket)
+        # print(ticket)
 
         if not event.tickets_event:
             event.tickets_event = ''

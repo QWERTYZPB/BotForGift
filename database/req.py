@@ -340,6 +340,22 @@ async def create_event(
         await session.rollback()
         return None
 
+
+
+async def find_events_by_name(event_name):
+    try:
+        async with async_session() as session:
+            result = await session.execute(
+                select(Event)
+                .where(Event.name.contains(event_name))
+                
+            )
+            return result.scalars().all()
+    except SQLAlchemyError as e:
+        print(f"Error getting active events: {e}")
+        return []
+
+
 async def get_active_events() -> List[Event]:
     try:
         async with async_session() as session:

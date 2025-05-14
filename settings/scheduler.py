@@ -58,9 +58,61 @@ class Scheduler:
 
 
     async def update_posts(self, bot: config.Bot):
-        pass    
+        events = await req.get_active_events()
+
+        for event in events:
+            if event.message_ids:
+                user_count = 0
+                win_count = None
+                raffle_data = None
+                msg: types.Message = None
+                if event.user_event_ids:
+                    user_count = len(event.user_event_ids.split(','))
+                
+                win_count = event.win_count
+                raffle_data = event.end_date.strftime("%d.%m.%Y, %H:%M")
+
+
+                webapp_url = 'https://t.me/' + (await bot.get_me()).username + f'?start={event.id}'
+
+                for data in event.message_ids.split(','):
+                    try:
+                        chat_id, message_id = data.split(':') 
+
+                        try:
+                            await bot.edit_message_text(
+                                chat_id=int(chat_id),
+                                message_id=int(message_id),
+                                text = lexicon.EVENT_TEXT.format(
+                                    name=event.name,
+                                    description=event.description or '',
+                                    users_count=user_count,
+                                    win_count=win_count,
+                                    raffle_date=raffle_data
+                                ),
+                            )
+                        except:
+                            try:
+                                await bot.edit_message_caption(
+                                    chat_id=int(chat_id),
+                                    message_id=int(message_id),
+                                    caption = lexicon.EVENT_TEXT.format(
+                                        name=event.name,
+                                        description=event.description or '',
+                                        users_count=user_count,
+                                        win_count=win_count,
+                                        raffle_date=raffle_data
+                                    ), 
+                                )
+                            except:
+                                pass
+
+                    except:
+                        pass
+    
 
     
+
     async def check_end_date(self, bot: config.Bot):
 
         events = await req.get_active_events()
@@ -137,6 +189,7 @@ class Scheduler:
     
     async def start_scheduler(self, bot: config.Bot):
         self.scheduler.add_job(self.check_end_date, 'cron', minute="*", args=(bot,))
+        self.scheduler.add_job(self.update_posts, 'cron', hour="*", args=(bot,))
         self.scheduler.start()
 
 

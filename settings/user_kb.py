@@ -12,8 +12,9 @@ from typing import List
 
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
+from settings.utils import generate_random_string
 from database import req
-import datetime
+import datetime, random
 import config
 
 
@@ -189,3 +190,36 @@ def back_to_event(event_id):
         InlineKeyboardButton(text='Назад', callback_data=f'user_event_show_{event_id}'),
         
     ).as_markup()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+async def create_captcha_kb(right_answer: str):
+
+    kb_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
+
+    buttns: list[InlineKeyboardButton] = [InlineKeyboardButton(text=await generate_random_string(5), callback_data='Captcha_False') for _ in range(2)]
+
+    buttns.append(InlineKeyboardButton(text=right_answer, callback_data='Captcha_True'))
+    
+    random.shuffle(buttns)
+
+    kb_builder.row(*buttns, width=3)
+    buttns.clear()
+
+    buttns.append(InlineKeyboardButton(text="🔁 Поменять капчу", callback_data='Change_Captcha'))
+    kb_builder.row(*buttns, width=1)
+    
+    return kb_builder.as_markup()

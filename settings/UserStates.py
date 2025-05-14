@@ -12,7 +12,12 @@ class AddChannel(StatesGroup):
 
 
 
+class FindEvent(StatesGroup):
+    event_name = State()
 
+
+class SetWinners(StatesGroup):
+    winners = State()
 
 class AddEvent(StatesGroup):
 

@@ -8,7 +8,7 @@ from aiogram.fsm.context import FSMContext
 import logging as lg
 from datetime import datetime, timedelta
 
-from settings import user_kb, lexicon, UserStates, request_utils
+from settings import user_kb, lexicon, UserStates, request_utils, utils
 from database.req import add_user
 from database import req
 import config
@@ -31,7 +31,7 @@ router = Router()
 
 
 @router.message(CommandStart())
-async def start_bot(message: types.Message, command: CommandObject):
+async def start_bot(message: types.Message, command: CommandObject, state: FSMContext):
     
     if command.args:
         try:
@@ -128,6 +128,11 @@ async def start_bot(message: types.Message, command: CommandObject):
             event_id = int(command.args)
 
             event = await req.get_event(event_id)
+
+            if event.use_captcha:
+                await state.update_data(event_id =event_id)
+                await utils.send_captcha_2user(message=message, bot=message.bot)
+                return
         
 
             user_count = 0
@@ -235,7 +240,7 @@ async def user_event(cb: types.CallbackQuery):
 
     if action == 'show':
         event = await req.get_event(event_id)
-        if event:
+        if event and event.is_active:
             user_count = 0
             win_count = None
             raffle_data = None
@@ -268,8 +273,161 @@ async def user_event(cb: types.CallbackQuery):
                 ),
                     reply_markup=await user_kb.show_event_kb(event.id, use_captha=event.use_captcha, is_active=event.is_active)
                 )
+        elif event and (not event.is_active):
+            user_count = 0
+            win_count = None
+            raffle_data = None
+
+            if event.user_event_ids:
+                user_count = len(event.user_event_ids.split(','))
+            
+            win_count = event.win_count
+            raffle_data = event.end_date.strftime("%d.%m.%Y, %H:%M")
+
+            winners = await req.get_event_winners(event.id)
+
+            text_for_owner_winners = '\n'.join([f'''<a href="{'https://t.me/'+winner.username if winner.username else 'tg://user?id='+str(winner.user_id)}">    {winner.fullname}</a>''' for winner in winners])
+                
+            deeplink_url = 'https://t.me/' + (await cb.bot.get_me()).username + f'?start={event.id}'
+
+            if event.media:
+                await cb.message.answer_photo(
+                    photo=event.media,
+                    caption=lexicon.EVENT_WIN_TEXT.format(
+                        name=event.name,
+                        winners=text_for_owner_winners,
+                        users_count=user_count,
+                        win_count=win_count,
+                        raffle_date=raffle_data
+                    ),
+                    reply_markup= user_kb.show_event_results_web_kb(url=deeplink_url)
+                )
+            else:
+                await cb.message.answer(
+                    text=lexicon.EVENT_WIN_TEXT.format(
+                        name=event.name,
+                        winners=text_for_owner_winners,
+                        users_count=user_count,
+                        win_count=win_count,
+                        raffle_date=raffle_data
+                    ),
+                    reply_markup= user_kb.show_event_results_web_kb(url=deeplink_url)
+                )
         else:
             await cb.message.answer('Что-то пошло не так...', reply_markup=user_kb.back_to_menu())
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@router.callback_query(F.data=='Change_Captcha')
+async def change_captcha(cb: types.CallbackQuery, bot: config.Bot):
+    await cb.answer('')
+    
+    try:await bot.delete_message(chat_id=cb.message.chat.id, message_id=cb.message.message_id)
+    except: pass
+
+    await utils.send_captcha_2user(cb, bot)
+    
+    
+    
+@router.callback_query(F.data.startswith('Captcha_'))
+async def captcha_true(cb: types.CallbackQuery, bot: config.Bot, state: FSMContext):
+    ans = cb.data.split('_')[-1]
+    if ans == "True":
+        data = await state.get_data()
+        if 'event_id' not in data.keys():
+            await cb.message.answer('Данные устарели, попробуйте заново', 
+                                    reply_markup=user_kb.back_to_menu())
+            await state.clear()
+            return
+        await bot.delete_message(chat_id=cb.message.chat.id, message_id=cb.message.message_id)
+        await cb.answer('')
+        await cb.message.answer('Капча пройдена успешно!')
+        
+        event_id = int(data['event_id'])
+
+        event = await req.get_event(event_id)
+    
+        user_count = 0
+        win_count = None
+        raffle_data = None
+
+        if event.user_event_ids:
+            user_count = len(event.user_event_ids.split(','))
+        
+        win_count = event.win_count
+        raffle_data = event.end_date.strftime("%d.%m.%Y, %H:%M")
+
+        if event.media:
+            await cb.message.answer_photo(
+                photo=event.media,
+                caption=lexicon.EVENT_TEXT.format(
+                name=event.name,
+                description=event.description or '',
+                users_count=user_count,
+                win_count=win_count,
+                raffle_date=raffle_data
+                ),
+                reply_markup= user_kb.show_private_chat_web_app(event.id, event.end_date)
+            )
+        else:
+            await cb.message.answer(
+                text=lexicon.EVENT_TEXT.format(
+                name=event.name,
+                description=event.description or '',
+                users_count=user_count,
+                win_count=win_count,
+                raffle_date=raffle_data
+                ),
+                reply_markup= user_kb.show_private_chat_web_app(event.id, event.end_date)
+            )
+    
+
+        
+    else:
+        await bot.delete_message(chat_id=cb.message.chat.id, message_id=cb.message.message_id)
+        await cb.answer('')
+        await cb.message.answer('Капча НЕ пройдена!')
+
+        await utils.send_captcha_2user(cb, bot)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 @router.callback_query(F.data.startswith('edit_event_'))
@@ -600,7 +758,7 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
         user_count = 0
         win_count = None
         raffle_data = None
-        message: types.Message = None
+        msg: types.Message = None
         if event.user_event_ids:
             user_count = len(event.user_event_ids.split(','))
         
@@ -612,7 +770,7 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
 
 
         if event.media:
-            message = await bot.send_photo(
+            msg = await bot.send_photo(
                 chat_id=channel_id,
                 photo=event.media,
                 caption=lexicon.EVENT_TEXT.format(
@@ -625,7 +783,7 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
                 reply_markup= user_kb.show_event_web_kb(url=webapp_url)
             )
         else:
-            message = await bot.send_message(
+            msg = await bot.send_message(
                 chat_id=channel_id,
                 text=lexicon.EVENT_TEXT.format(
                 name=event.name,
@@ -636,14 +794,14 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
                 ),
                 reply_markup= user_kb.show_event_web_kb(url=webapp_url)
             )
-        if message:
+        if msg:
             event_message_ids = ''
             if not event.message_ids:
-                event_message_ids = channel_id+":"+str(message.message_id)
+                event_message_ids = channel_id+":"+str(msg.message_id)
             elif not event.message_ids  == '' :
-                event_message_ids += channel_id+":"+str(message.message_id)
+                event_message_ids += channel_id+":"+str(msg.message_id)
             else:
-                event_message_ids = ','.join(list(set(event_message_ids.split(',').append(channel_id+":"+str(message.message_id)))))
+                event_message_ids = ','.join(list(set(event_message_ids.split(',').append(channel_id+":"+str(msg.message_id)))))
 
             await req.update_event(
                 event_id=int(event_id),
@@ -850,12 +1008,33 @@ async def set_end_date(message: types.Message, state: FSMContext):
         # Получаем все данные из состояния
         data = await state.get_data()
         
-        await req.create_event(
+        event = await req.create_event(
             name=data['name'],
+            win_count=data['win_count'],
+            owner_id=message.from_user.id,
             description=data['description'],
             end_date = date_obj
         )
+
+        if not event:
+            await message.answer('Ошибка создания! Попробуйте снова...', reply_markup=user_kb.back_to_menu())
+            return
         
+
+        user = await req.get_user(message.from_user.id)
+
+        if not user.event_ids: 
+            await req.update_user(
+                user_id=message.from_user.id,
+                event_ids=str(event.id) + ','
+            )
+        else:
+            await req.update_user(
+                user_id=message.from_user.id,
+                event_ids=user.event_ids+str(event.id) + ','
+            )
+
+
         await message.answer(
             '🎉 Розыгрыш успешно создан!',
             reply_markup=user_kb.back_to_menu()
