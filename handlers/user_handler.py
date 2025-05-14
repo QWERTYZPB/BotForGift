@@ -881,8 +881,15 @@ async def handle_chat_selection(message: types.Message, bot: config.Bot):
         return
     
     user = await req.get_user(message.from_user.id)
+    
+    list_user_channels = user.channel_ids
 
-    if str(chat_shared.chat_id) in user.channel_ids.split(','):
+    if not user.channel_ids:
+        list_user_channels = []
+    else:
+        list_user_channels = list_user_channels.split(",")
+
+    if str(chat_shared.chat_id) in list_user_channels:
         await message.answer('Канал уже добавлен!',reply_markup=user_kb.back_to_menu())
         return
         
