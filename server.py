@@ -9,7 +9,7 @@ from config import bot
 
 
 app = quart.Quart(__name__)
-quart_cors.cors(app, allow_origin=['*'])
+quart_cors.cors(app, allow_origin=['*', 'civerandom.ru'])
 
 APP_PREFIX='/api'
 
