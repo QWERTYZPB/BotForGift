@@ -904,10 +904,16 @@ async def handle_chat_selection(message: types.Message, bot: config.Bot):
             url='https://t.me/' + chat_username
         )
 
-        await req.update_user(
-            user_id=message.from_user.id,
-            channel_ids=user.channel_ids + ',' + str(chat_id)
-        )
+        if user.channel_ids:
+            await req.update_user(
+                    user_id=message.from_user.id,
+                    channel_ids=user.channel_ids + ',' + str(chat_id)
+                )
+        else:
+            await req.update_user(
+                    user_id=message.from_user.id,
+                    channel_ids=str(chat_id)
+                )
 
         await message.answer(f"Выбрана группа: {chat_title} \nID: {chat_id}",reply_markup=user_kb.back_to_menu())
 
@@ -920,10 +926,16 @@ async def handle_chat_selection(message: types.Message, bot: config.Bot):
             name=chat_title,
             url='https://t.me/' + chat_username
         )
-        await req.update_user(
-            user_id=message.from_user.id,
-            channel_ids=user.channel_ids + ',' + str(chat_id)
-        )
+        if user.channel_ids:
+            await req.update_user(
+                user_id=message.from_user.id,
+                channel_ids=user.channel_ids + ',' + str(chat_id)
+            )
+        else:
+            await req.update_user(
+                    user_id=message.from_user.id,
+                    channel_ids=str(chat_id)
+              )
 
         await message.answer(f"Выбран канал: {chat_title} \nID: {chat_id}",reply_markup=user_kb.back_to_menu())
 

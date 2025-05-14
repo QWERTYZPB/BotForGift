@@ -41,7 +41,7 @@ Traceback (most recent call last):
   File "/root/GiftBot/BotForGift/venv/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 43, in call
     return await wrapped()
            ^^^^^^^^^^^^^^^
-  File "/root/GiftBot/BotForGift/handlers/user_handler.py", line 885, in handle_chat_selection
-    if str(chat_shared.chat_id) in user.channel_ids.split(','):
-                                   ^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: 'NoneType' object has no attribute 'split'
+  File "/root/GiftBot/BotForGift/handlers/user_handler.py", line 925, in handle_chat_selection
+    channel_ids=user.channel_ids + ',' + str(chat_id)
+                ~~~~~~~~~~~~~~~~~^~~~~
+TypeError: unsupported operand type(s) for +: 'NoneType' and 'str'
