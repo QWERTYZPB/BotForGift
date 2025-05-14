@@ -1,5 +1,6 @@
 .env
 TASK
 venv/*
+venv-bot/*
 __pycache__/*
 t.py
