@@ -93,30 +93,32 @@ async def user_tickets_not_in_event(user: req.User, event: req.Event):
 
 
 
-async def _get_tickets(user: req.User):
+async def _get_tickets(user: req.User, event: req.Event):
     tickets = []
-    for ticket_id in user.tickets_ids.split(','):
+    user_tickets = user.tickets_ids.split(',') if user.tickets_ids else []
+    for ticket_id in user_tickets:
         if not ticket_id == '':
             try:
                 ticket = await req.get_ticket(int(ticket_id))
-
-                tickets.append({
-                    "id": ticket.id,
-                    "number": ticket.number,
-                    "createdAt": ticket.created_at.strftime("%d.%m.%Y, %H:%M")
-                    })
+                if ticket.event_id == event.id:
+                    tickets.append({
+                        "id": ticket.id,
+                        "number": ticket.number,
+                        "createdAt": ticket.created_at.strftime("%d.%m.%Y, %H:%M")
+                        })
             except:
                 pass
         
     return tickets
 
 
-async def get_json_user_tickets(user_id: int):
+async def get_json_user_tickets(user_id: int, event_id: int):
     user = await req.get_user(user_id=user_id)
+    event = await req.get_event(event_id=event_id)
 
     
     return {
-            "tickets": await _get_tickets(user=user)
+            "tickets": await _get_tickets(user=user, event=event)
         } 
 
 

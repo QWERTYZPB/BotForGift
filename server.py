@@ -36,12 +36,13 @@ async def get_user(userId, eventId):
 
 
 
-@app.route(APP_PREFIX+'/tickets/<userId>')
-async def get_tickets(userId):
+@app.route(APP_PREFIX+'/tickets/<userId>-<eventId>')
+async def get_tickets(userId, eventId):
     
     userId = int(userId)
+    eventId = int(eventId)
 
-    return await server_utils.get_json_user_tickets(userId)
+    return await server_utils.get_json_user_tickets(userId, eventId)
 
 
 @app.route(APP_PREFIX+'/getEvent/<eventId>', methods=["GET"])
