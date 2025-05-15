@@ -288,7 +288,7 @@ async def user_event(cb: types.CallbackQuery):
 
             text_for_owner_winners = '\n'.join([f'''<a href="{'https://t.me/'+winner.username if winner.username else 'tg://user?id='+str(winner.user_id)}">    {winner.fullname}</a>''' for winner in winners])
                 
-            deeplink_url = 'https://t.me/' + (await cb.bot.get_me()).username + f'?startapp=event_id={event.id}%26mode=results'
+            deeplink_url = 'https://t.me/' + (await cb.bot.get_me()).username + f'?startapp=event_id-{event.id}:mode-results'
 
             if event.media:
                 await cb.message.answer_photo(
@@ -766,7 +766,7 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
         raffle_data = event.end_date.strftime("%d.%m.%Y, %H:%M")
 
 
-        webapp_url = 'https://t.me/' + (await bot.get_me()).username + f'?startapp=event_id={event.id}%26mode=raffle'
+        webapp_url = 'https://t.me/' + (await bot.get_me()).username + f'?startapp=event_id-{event.id}:mode-raffle'
 
 
         if event.media:
