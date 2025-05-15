@@ -47,14 +47,14 @@ async def add_user(
             return new_user
             
     except IntegrityError as e:
-        await session.rollback()
+        # await session.rollback()
         # print(f"Ошибка целостности: {e}")
         # Если пользователь уже существует, можно вернуть существующего
         existing_user = await session.get(User, user_id)
         return existing_user
         
     except SQLAlchemyError as e:
-        await session.rollback()
+        # await session.rollback()
         print(f"Ошибка базы данных: {e}")
         return None
         
@@ -97,7 +97,7 @@ async def update_user(user_id: int, **data) -> Optional[User]:
             return user
     except SQLAlchemyError as e:
         print(f"Error updating user: {e}")
-        await session.rollback()
+        # await session.rollback()
         return None
 
 
@@ -121,7 +121,7 @@ async def add_ticket(
             return ticket
     except Exception as e:
         print(f"Error adding ticket: {e}")
-        await session.rollback()
+        # await session.rollback()
         return None
     
 
@@ -181,7 +181,7 @@ async def generate_ticket_number(event_id: int, user_id: int) -> Optional[Ticket
 
     except SQLAlchemyError as e:
         print(f"Ошибка генерации билета: {e}")
-        await session.rollback()
+        # await session.rollback()
         return None
 
 
@@ -221,7 +221,7 @@ async def update_ticket(id: int, **data) -> Optional[Ticket]:
             return ticket
     except SQLAlchemyError as e:
         print(f"Error updating user: {e}")
-        await session.rollback()
+        # await session.rollback()
         return None
 
 
@@ -272,12 +272,12 @@ async def add_channel(channel_id:int, name: str, url: str, root_event_ids: str =
             return channel
         
     except IntegrityError as e:
-        await session.rollback()
+        # await session.rollback()
         print(f"Channel already exists: {e}")
         return None
     except SQLAlchemyError as e:
         print(f"Error adding channel: {e}")
-        await session.rollback()
+        # await session.rollback()
         return None
     
 
@@ -315,7 +315,7 @@ async def update_channel(channel_id: int, **data) -> Optional[Channel]:
             return channel
     except SQLAlchemyError as e:
         print(f"Error updating channel: {e}")
-        await session.rollback()
+        # await session.rollback()
         return None
 
 async def create_event(
@@ -337,7 +337,7 @@ async def create_event(
             return event
     except SQLAlchemyError as e:
         print(f"Error creating event: {e}")
-        await session.rollback()
+        # await session.rollback()
         return None
 
 
@@ -421,7 +421,7 @@ async def update_event_status(event_id: int, is_active: bool) -> Optional[Event]
             return event
     except SQLAlchemyError as e:
         print(f"Error updating event status: {e}")
-        await session.rollback()
+        # await session.rollback()
         return None
 
 
@@ -441,7 +441,7 @@ async def update_event(event_id: int, **kw) -> Optional[Event]:
             return event
     except SQLAlchemyError as e:
         print(f"Error updating event status: {e}")
-        await session.rollback()
+        # await session.rollback()
         return None
 
 
@@ -478,7 +478,7 @@ async def delete_event(event_id: int) -> bool:
 
     except SQLAlchemyError as e:
         print(f"Ошибка при удалении события: {e}")
-        await session.rollback()
+        # await session.rollback()
         return False
     except Exception as e:
         print(f"Неожиданная ошибка: {e}")

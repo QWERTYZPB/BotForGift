@@ -140,6 +140,7 @@ async def check_sub(userID, EventId):
           and result['allSubscribed'] \
             and (userID not in users_in_event): 
 
+        
         if event.user_event_ids:
             await req.update_event(
                 event_id=event.id,

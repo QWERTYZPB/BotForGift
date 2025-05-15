@@ -194,6 +194,7 @@ async def get_json_event_channels(eventId):
 
     channels_event = []
 
+    
     for channel_id in event.channel_event_ids.split(','):
         if not channel_id == '':
             channels_event.append(await req.get_channel(int(channel_id)))
