@@ -35,7 +35,6 @@ async def get_user(userId, eventId):
     return await server_utils.get_json_user(userId, eventId)
 
 
-
 @app.route(APP_PREFIX+'/tickets/<userId>-<eventId>')
 async def get_tickets(userId, eventId):
     
