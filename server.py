@@ -27,6 +27,37 @@ async def get_channels(userId):
     return await server_utils.get_json_event_channels(userId)
 
 
+@app.route(APP_PREFIX+'/UpdateUser/', methods=["POST"])
+async def updateUserData():
+
+    data = await quart.request.get_json()
+
+
+    required_fields = {'username', 'user_id'}
+    if not required_fields.issubset(data):
+        return quart.jsonify({"error": "Missing required fields"}), 400
+
+    username = data['username']
+    user_id = data['user_id']
+
+    try:
+        await req.add_user(
+            user_id=int(user_id),
+            username=username
+        )
+    except:
+        await req.update_user(
+            user_id=int(user_id),
+            username=username
+        )
+
+
+
+    return quart.jsonify({"ok": True}), 200
+
+
+
+
 @app.route(APP_PREFIX+'/users/<userId>-<eventId>')
 async def get_user(userId, eventId):
 
