@@ -73,7 +73,7 @@ class Scheduler:
                 raffle_data = event.end_date.strftime("%d.%m.%Y, %H:%M")
 
 
-                webapp_url = 'https://t.me/' + (await bot.get_me()).username + f'?startapp=event_id={event.id}&action=raffle'
+                webapp_url = 'https://t.me/' + (await bot.get_me()).username + f'?startapp=event_id={event.id}&mode=raffle'
 
 
                 for data in event.message_ids.split(','):
@@ -144,7 +144,7 @@ class Scheduler:
                 text_winners = '\n'.join([f"    {i}. {winner.fullname}" for i, winner in enumerate(winners, start=1)])
                 text_for_owner_winners = '\n'.join([f'''<a href="{'https://t.me/'+winner.username if winner.username else 'tg://user?id='+str(winner.user_id)}">    {winner.fullname}</a>''' for winner in winners])
                 
-                deeplink_url = 'https://t.me/' + (await bot.get_me()).username + f'?startapp=event_id={event.id}&action=results'
+                deeplink_url = 'https://t.me/' + (await bot.get_me()).username + f'?startapp=event_id={event.id}&mode=results'
 
 
                 for channel_id in event.channel_event_ids.split(','):
