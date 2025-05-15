@@ -766,7 +766,7 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
         raffle_data = event.end_date.strftime("%d.%m.%Y, %H:%M")
 
 
-        webapp_url = 'https://t.me/' + (await bot.get_me()).username + f'?start={event.id}'
+        webapp_url = 'https://t.me/' + (await bot.get_me()).username + f'?startapp=event_id={event.id}'
 
 
         if event.media:
