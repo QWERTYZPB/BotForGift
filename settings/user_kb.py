@@ -12,7 +12,7 @@ from typing import List
 
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
-from settings.utils import generate_random_string
+from settings.utils import generate_random_string, encode_data
 from database import req
 import datetime, random
 import config
@@ -156,14 +156,14 @@ def show_private_chat_web_app(event_id, event_end_date: datetime.datetime):
         btn = [
                 InlineKeyboardButton(
                     text='Результаты', 
-                    web_app=WebAppInfo(url=f'https://{config.HOST_URL}/?tgWebAppStartParam=event_id-{event_id}:mode-results')
+                    web_app=WebAppInfo(url=f'https://{config.HOST_URL}/?tgWebAppStartParam=' + encode_data(f'event_id={event_id}&mode_results'))
                     )
             ]
     else:
         btn = [
                 InlineKeyboardButton(
                     text='Учавствую', 
-                    web_app=WebAppInfo(url=f'https://{config.HOST_URL}/?tgWebAppStartParam=event_id-{event_id}:mode-raffle')
+                    web_app=WebAppInfo(url=f'https://{config.HOST_URL}/?tgWebAppStartParam='+encode_data(f'event_id={event_id}&mode_raffle'))
                     )
             ]
 

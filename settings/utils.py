@@ -1,4 +1,5 @@
 import random
+import base64
 from PIL import Image, ImageDraw, ImageFont
 from aiogram import types, Bot
 from settings import user_kb
@@ -52,7 +53,19 @@ async def generate_captcha():
 
 
 
-
+def encode_data(string: str) -> str:
+    """
+    Кодирует словарь в base64 строку, безопасную для URL
+    """
+    # Преобразуем словарь в JSON-строку
+    
+    # Кодируем в bytes
+    data_bytes = string.encode('utf-8')
+    
+    # Кодируем в base64 и делаем безопасным для URL
+    encoded = base64.urlsafe_b64encode(data_bytes).decode('utf-8')
+    
+    return encoded
 
 
 
