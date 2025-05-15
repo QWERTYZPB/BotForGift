@@ -27,7 +27,7 @@ async def get_channels(userId):
     return await server_utils.get_json_event_channels(userId)
 
 
-@app.route(APP_PREFIX+'/UpdateUser/', methods=["POST"])
+@app.route(APP_PREFIX+'/UpdateUser', methods=["POST"])
 async def updateUserData():
 
     data = await quart.request.get_json()
