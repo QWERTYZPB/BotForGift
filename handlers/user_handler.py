@@ -288,7 +288,7 @@ async def user_event(cb: types.CallbackQuery):
 
             text_for_owner_winners = '\n'.join([f'''<a href="{'https://t.me/'+winner.username if winner.username else 'tg://user?id='+str(winner.user_id)}">    {winner.fullname}</a>''' for winner in winners])
                 
-            deeplink_url = 'https://t.me/' + (await cb.bot.get_me()).username + f'?startapp='+ utils.encode_data(f'event_id={event.id}&mode_results')
+            deeplink_url = 'https://t.me/' + (await cb.bot.get_me()).username + f'?startapp='+ utils.encode_data(f'event_id={event.id}&mode=results')
 
             if event.media:
                 await cb.message.answer_photo(
