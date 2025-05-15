@@ -182,12 +182,13 @@ async def get_json_event_winners(eventId: int):
 
 async def get_json_user(userId, event_id):
     user = await req.get_user(user_id=userId)
+    event = await req.get_event(event_id=event_id)
 
 
     return {
         "id": user.user_id,
         "referralLink": f"{config.BOT_URL}?start={userId}-{event_id}", # t.me/<bot_username>?start=<parameter>
-        "tickets": await _get_tickets(user=user)
+        "tickets": await _get_tickets(user=user, event=event)
         }
 
 
