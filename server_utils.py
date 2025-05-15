@@ -64,7 +64,7 @@ async def user_tickets_not_in_event(user: req.User, event: req.Event):
     if not user.tickets_ids:
         return True
     
-    if event.tickets_event:
+    if not event.tickets_event:
         return True
 
     
