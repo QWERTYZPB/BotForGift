@@ -73,7 +73,7 @@ class Scheduler:
                 raffle_data = event.end_date.strftime("%d.%m.%Y, %H:%M")
 
 
-                webapp_url = 'https://t.me/' + (await bot.get_me()).username + f'?startapp='+utils.encode_data(f'event_id={event.id}&mode_raffle')
+                webapp_url = 'https://t.me/' + (await bot.get_me()).username + f'?startapp='+utils.encode_data(f'event_id={event.id}&mode=raffle')
 
 
                 for data in event.message_ids.split(','):
