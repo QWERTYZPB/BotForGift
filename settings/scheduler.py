@@ -73,7 +73,8 @@ class Scheduler:
                 raffle_data = event.end_date.strftime("%d.%m.%Y, %H:%M")
 
 
-                webapp_url = 'https://t.me/' + (await bot.get_me()).username + f'?start={event.id}'
+                webapp_url = 'https://t.me/' + (await bot.get_me()).username + f'?startapp=event_id={event.id}'
+
 
                 for data in event.message_ids.split(','):
                     try:
@@ -90,6 +91,7 @@ class Scheduler:
                                     win_count=win_count,
                                     raffle_date=raffle_data
                                 ),
+                                reply_markup= user_kb.show_event_web_kb(url=webapp_url)
                             )
                         except:
                             try:
@@ -103,6 +105,7 @@ class Scheduler:
                                         win_count=win_count,
                                         raffle_date=raffle_data
                                     ), 
+                                    reply_markup= user_kb.show_event_web_kb(url=webapp_url)
                                 )
                             except:
                                 pass
