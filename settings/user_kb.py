@@ -156,14 +156,14 @@ def show_private_chat_web_app(event_id, event_end_date: datetime.datetime):
         btn = [
                 InlineKeyboardButton(
                     text='Результаты', 
-                    web_app=WebAppInfo(url=f'https://{config.HOST_URL}/?tgWebAppStartParam=eventId={event_id}&mode=results')
+                    web_app=WebAppInfo(url=f'https://{config.HOST_URL}/?tgWebAppStartParam=eventId={event_id}%26mode=results')
                     )
             ]
     else:
         btn = [
                 InlineKeyboardButton(
                     text='Учавствую', 
-                    web_app=WebAppInfo(url=f'https://{config.HOST_URL}/?tgWebAppStartParam=eventId={event_id}&mode=raffle')
+                    web_app=WebAppInfo(url=f'https://{config.HOST_URL}/?tgWebAppStartParam=eventId={event_id}%26mode=raffle')
                     )
             ]
 
