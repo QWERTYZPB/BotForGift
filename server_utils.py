@@ -68,13 +68,13 @@ async def user_tickets_not_in_event(user: req.User, event: req.Event):
         return True
 
     
-    user_tickets_nums = [i.number for i in await req.get_user_tickets(user.user_id)]
+    user_tickets_nums = [i.number for i in await req.get_user_tickets(user.user_id) if i]
     event_tickets = []
     
-    for ticket in event.tickets_event.split(','):
-        if not ticket == '':
+    for ticket_id in event.tickets_event.split(','):
+        if not ticket_id == '':
             event_tickets.append(
-                (await req.get_ticket(int(ticket))).number
+                (await req.get_ticket(int(ticket_id))).number
             )
 
     for user_ticket in user_tickets_nums:
@@ -194,7 +194,7 @@ async def get_json_event_channels(eventId):
 
     channels_event = []
 
-    
+
     for channel_id in event.channel_event_ids.split(','):
         if not channel_id == '':
             channels_event.append(await req.get_channel(int(channel_id)))
