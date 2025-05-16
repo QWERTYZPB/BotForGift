@@ -73,9 +73,12 @@ async def user_tickets_not_in_event(user: req.User, event: req.Event):
     
     for ticket_id in event.tickets_event.split(','):
         if not ticket_id == '':
-            event_tickets.append(
-                (await req.get_ticket(int(ticket_id))).number
-            )
+            try:
+                event_tickets.append(
+                    (await req.get_ticket(int(ticket_id))).number
+                )
+            except:
+                pass
 
     for user_ticket in user_tickets_nums:
         if user_ticket in event_tickets:

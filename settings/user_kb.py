@@ -76,7 +76,7 @@ async def show_user_channels(channels, event_id):
 
             if channel.root_event_ids:
                 if str(event_id) in channel.root_event_ids.split(','):
-                    channel_text= channel.name + ' ✅'
+                    channel_text= '✅' + channel.name 
                     channel_cb_data = f'channel_disable_{event_id}_{channel.id}'
 
             if channel:
