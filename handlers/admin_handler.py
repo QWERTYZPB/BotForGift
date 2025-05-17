@@ -145,14 +145,15 @@ async def confirm_winners(cb: types.CallbackQuery, state: FSMContext):
     
 
     for ticket_id in event.tickets_event.split(','):
-        ticket = await req.get_ticket(int(ticket_id))
-        if ticket:
-            if ticket.number in root_tickets:
-                await req.update_ticket(
-                    id=ticket.id,
-                    is_winner=True
-                )
-                root_tickets.remove(ticket.number)
+        if ticket_id != '':
+            ticket = await req.get_ticket(int(ticket_id))
+            if ticket:
+                if ticket.number in root_tickets:
+                    await req.update_ticket(
+                        id=ticket.id,
+                        is_winner=True
+                    )
+                    root_tickets.remove(ticket.number)
 
     unhided_tickets = '' if len(root_tickets) == 0 else "\nНе найденные тикеты:\n"+'\n'.join(root_tickets)
     

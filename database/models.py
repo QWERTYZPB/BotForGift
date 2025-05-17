@@ -93,6 +93,9 @@ class Event(Base):
 
     message_ids: Mapped[str] = mapped_column(String, nullable=True)
 
+    is_referral: Mapped[bool] = mapped_column(Boolean, default=False)
+    ref_tickets_count: Mapped[bool] = mapped_column(Integer, nullable=True)
+
 
 
 
