@@ -154,9 +154,11 @@ async def get_json_event_winners(eventId: int):
     for i, winner in enumerate(event_winners):
         image_url = request_utils.get_channel_image(
             bot_token=config.BOT_TOKEN, channel_id=winner.user_id)
-        if len(image_url) == 2:
-            image_url = request_utils.bytes_to_data_url(image_url[0])
-        
+        if image_url:
+            if len(image_url) == 2:
+                image_url = request_utils.bytes_to_data_url(image_url[0])
+        else:
+            image_url = '/friends.webp'
         tickets = [await req.get_ticket(int(ticket_id)) for ticket_id in winner.tickets_ids.split(',') if ticket_id!='']
         
         result.append(

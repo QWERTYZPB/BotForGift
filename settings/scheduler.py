@@ -54,7 +54,7 @@ async def make_raffle(event: req.Event):
 class Scheduler:
     def __init__(self):
 
-        self.scheduler = AsyncIOScheduler()
+        self.scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
 
 
     async def update_posts(self, bot: config.Bot):
