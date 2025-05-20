@@ -134,6 +134,7 @@ async def get_json_event_time(eventId: int):
 
     date = event_date - datetime.now()
     
+    
     return {
      
             "days": 0,

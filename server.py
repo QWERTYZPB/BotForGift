@@ -38,17 +38,20 @@ async def updateUserData():
         return quart.jsonify({"error": "Missing required fields"}), 400
 
     username = data['username']
+    fullname = data['fullname']
     user_id = data['user_id']
 
     try:
         await req.add_user(
             user_id=int(user_id),
-            username=username
+            username=username,
+            fullname=fullname
         )
     except:
         await req.update_user(
             user_id=int(user_id),
-            username=username
+            username=username,
+            fullname=fullname
         )
 
 
@@ -124,15 +127,13 @@ async def check_sub(userID, EventId):
     event = await req.get_event(event_id=int(EventId))
     user = await req.get_user(int(userID))
 
-    
-    # print(event)
 
     channels = [await req.get_channel(int(i)) for i in event.channel_event_ids.split(',') if i!='']
 
     
     
     result = await server_utils.get_json_subscriptions(bot, int(userID), channels)
-    # print(result)
+
     users_in_event = event.user_event_ids.split(',') if event.user_event_ids else []
 
 
