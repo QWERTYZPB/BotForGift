@@ -383,6 +383,10 @@ async def get_event_winners(event_id: int) -> List[User]:
         )
         event = event_.scalars().first()
 
+        if not event.tickets_event:
+            return []
+        
+        
         for ticket in event.tickets_event.split(','):
             if not ticket == '':    
                 t = await get_ticket(int(ticket))
