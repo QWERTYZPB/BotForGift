@@ -1110,5 +1110,5 @@ async def handler_event_ation(cb: types.CallbackQuery):
     if action == 'delete':
         await cb.message.edit_text(
             text='Вы действительно хотите <b>УДАЛИТЬ</b> ваш розыгрыш?',
-            reply_markup=user_kb.
+            reply_markup=user_kb.confirm_delete_event(event_id)
         )
