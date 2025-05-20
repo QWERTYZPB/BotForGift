@@ -150,11 +150,12 @@ class Scheduler:
                     deeplink_url = 'https://t.me/' + (await bot.get_me()).username + f'?startapp=' + utils.encode_data(f'event_id={event.id}&mode=results')
 
 
-                    for channel_id in event.channel_event_ids.split(','):
+                    for data in event.message_ids.split(','):
+                        channel_id, message_id = data.split(':')
                         if event.media:
-                            await bot.send_photo(
+                            await bot.edit_message_caption(
+                                message_id=message_id,
                                 chat_id=channel_id,
-                                photo=event.media,
                                 caption=lexicon.EVENT_WIN_TEXT.format(
                                     name=event.name,
                                     winners=text_winners,
@@ -165,8 +166,9 @@ class Scheduler:
                                 reply_markup= user_kb.show_event_results_web_kb(url=deeplink_url)
                             )
                         else:
-                            await bot.send_message(
+                            await bot.edit_message_text(
                                 chat_id=channel_id,
+                                message_id=message_id,
                                 text=lexicon.EVENT_WIN_TEXT.format(
                                     name=event.name,
                                     winners=text_winners,
@@ -185,6 +187,7 @@ class Scheduler:
                             win_count=win_count,
                             raffle_date=raffle_data
                         ),
+                        reply_markup=user_kb.show_event_results_web_kb(url=deeplink_url)
                     )
                     await req.update_event(
                         event_id=event.id,
