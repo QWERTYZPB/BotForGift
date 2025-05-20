@@ -160,6 +160,27 @@ def show_event_results_web_kb(url):
         )
 
 
+def show_private_event_results_web_kb(url, event_id):
+
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text='Результаты', 
+                    url=url
+                    )
+            ],
+            [
+                InlineKeyboardButton(
+                    text='Удалить',
+                    callback_data=f'event_delete_{event_id}'
+                )
+            ]
+        ]
+        )
+
+
+
 def show_private_chat_web_app(event_id, event_end_date: datetime.datetime):
     btn = []
     
@@ -169,7 +190,7 @@ def show_private_chat_web_app(event_id, event_end_date: datetime.datetime):
                     text='Результаты', 
                     web_app=WebAppInfo(url=f'https://{config.HOST_URL}/?tgWebAppStartParam=' + encode_data(f'event_id={event_id}&mode=results'))
                     )
-            ]
+            ],
     else:
         btn = [
                 InlineKeyboardButton(

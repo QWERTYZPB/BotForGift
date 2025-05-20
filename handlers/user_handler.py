@@ -300,7 +300,7 @@ async def user_event(cb: types.CallbackQuery):
                         win_count=win_count,
                         raffle_date=raffle_data
                     ),
-                    reply_markup= user_kb.show_event_results_web_kb(url=deeplink_url)
+                    reply_markup= user_kb.show_private_event_results_web_kb(url=deeplink_url, event_id=event.id)
                 )
             else:
                 await cb.message.answer(
@@ -311,7 +311,7 @@ async def user_event(cb: types.CallbackQuery):
                         win_count=win_count,
                         raffle_date=raffle_data
                     ),
-                    reply_markup= user_kb.show_event_results_web_kb(url=deeplink_url)
+                    reply_markup= user_kb.show_private_event_results_web_kb(url=deeplink_url, event_id=event.id)
                 )
         else:
             await cb.message.answer('Что-то пошло не так...', reply_markup=user_kb.back_to_menu())
