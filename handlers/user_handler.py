@@ -840,7 +840,22 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
 
     await req.delete_event(int(event_id))
     user = await req.get_user(cb.from_user.id)
+    
+    # rm event id from channels
+    event_channels = event.channel_event_ids.split(',')
+    for channel_id in event_channels:
+        try:
+            channel = await req.get_channel(int(channel_id))
+            chnl_event_ids = channel.root_event_ids.split(',')
+            chnl_event_ids.remove(event_id)
+            await req.update_channel(
+                channel_id=channel.id,
+                root_event_ids=','.join(chnl_event_ids)
+            )
+        except:
+            pass
 
+    # rm event id from user events
     new_user_events = user.event_ids.split(',')
     new_user_events.remove(event_id)
 
