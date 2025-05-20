@@ -824,7 +824,20 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
 async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
     await cb.answer()
     event_id = cb.data.split('_')[-1]
+
+    event = await req.get_event(int(event_id))
     
+    for data in event.message_ids.split(','):
+        try:
+            chat_id, message_id = data.split(':') 
+
+            await cb.bot.delete_message(
+                chat_id=chat_id,
+                message_id=message_id
+            )
+        except:
+            pass
+
     await req.delete_event(int(event_id))
     user = await req.get_user(cb.from_user.id)
 
