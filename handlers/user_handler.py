@@ -741,6 +741,15 @@ async def send_post(cb: types.CallbackQuery):
     
 
 
+@router.callback_query(F.data.startswith('decline_'))
+async def handle_decline(cb: types.CallbackQuery):
+    await cb.message.edit_text(
+        text='Успешно отменено',
+        reply_markup=user_kb.back_to_menu()
+    )
+
+
+
 @router.callback_query(F.data.startswith('confirm_send_'))
 async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
     await cb.answer()
@@ -809,6 +818,30 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
             )
 
     await cb.message.edit_text('Успешно разослано по всем каналам!', reply_markup=user_kb.back_to_event(event_id))
+
+
+@router.callback_query(F.data.startswith('confirm_delete_'))
+async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
+    await cb.answer()
+    event_id = cb.data.split('_')[-1]
+    
+    await req.delete_event(int(event_id))
+    user = await req.get_user(cb.from_user.id)
+
+    new_user_events = user.event_ids.split(',')
+    new_user_events.remove(event_id)
+
+    await req.update_user(
+        user_id=user.user_id,
+        event_ids=','.join(new_user_events)
+    )
+
+    await cb.message.edit_text(
+        text='Розыгрыш успешно удален',
+        reply_markup=user_kb.back_to_menu()
+    )
+
+
 
 
 
@@ -1063,14 +1096,19 @@ async def set_end_date(message: types.Message, state: FSMContext):
     except ValueError:
         await message.answer('❌ Неверный формат даты или дата в прошлом! Используйте формат ДД.ММ.ГГГГ ЧЧ:ММ')
 
-    # event = await req.create_event(
-    #     name="Event X",
-    #     description="Test Event X",
-    #     channel_event_ids= ','.join(['-1002141057588', '-1001744551956']),
-    #     win_count=5,
-    #     start_date=datetime.now(),
-    #     end_date=datetime.now() + timedelta(days=7),
-    #     is_active=True,
-    #     owner_id=1060834219  # Используем существующий user_id
-    # )
-    # print(f"Создано событие: event x")
+
+
+
+
+
+@router.callback_query(F.data.startswith('event_'))
+async def handler_event_ation(cb: types.CallbackQuery):
+    action = cb.data.split('_')[-2]
+    event_id = int(cb.data.split('_')[-1])
+
+
+    if action == 'delete':
+        await cb.message.edit_text(
+            text='Вы действительно хотите <b>УДАЛИТЬ</b> ваш розыгрыш?',
+            reply_markup=user_kb.
+        )

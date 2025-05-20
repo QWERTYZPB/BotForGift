@@ -42,6 +42,17 @@ def back_to_menu():
         InlineKeyboardButton(text='Назад', callback_data='backMain')
     ).as_markup()
 
+
+
+def confirm_delete_event(event_id):
+    return InlineKeyboardBuilder().row(
+        InlineKeyboardButton(text='✅ Да', callback_data=f'confirm_delete_{event_id}'),
+        InlineKeyboardButton(text='❌ Нет', callback_data=f'decline_delete_{event_id}'),
+        InlineKeyboardButton(text='Назад', callback_data=f'user_event_show_{event_id}'),
+    ).as_markup()
+
+
+
 async def create_user_raffles(events: List[str]):
     btns = []
 
@@ -99,24 +110,24 @@ async def show_event_kb(event_id: int, use_captha: bool = False, is_active: bool
     return InlineKeyboardBuilder().row(
         InlineKeyboardButton(text='Название', callback_data=f'edit_event_name_{event_id}'),
         InlineKeyboardButton(text='Медиа', callback_data=f'edit_event_media_{event_id}'),
+
         InlineKeyboardButton(text='Описание', callback_data=f'edit_event_description_{event_id}'),
-        
         InlineKeyboardButton(text='Победители (кол-во)', callback_data=f'edit_event_wins_{event_id}'),
+
         InlineKeyboardButton(text='Каналы', callback_data=f'edit_event_channels_{event_id}'),
         InlineKeyboardButton(text='Дата', callback_data=f'edit_event_date_{event_id}'),
 
-        InlineKeyboardButton(text='Рассылка', callback_data=f"send_{event_id}"),
-        
+        InlineKeyboardButton(text='Отправить розыгрыш', callback_data=f"send_{event_id}"),
         InlineKeyboardButton(text='Капча ✅', callback_data=f"captcha_disable_{event_id}") if use_captha else \
         InlineKeyboardButton(text='Капча ❌', callback_data=f"captcha_enable_{event_id}"),
 
         InlineKeyboardButton(text='Активно ✅', callback_data=f"activeEvent_disable_{event_id}") if is_active else \
         InlineKeyboardButton(text='Активно ❌', callback_data=f"activeEvent_enable_{event_id}"),
          
-
+        InlineKeyboardButton(text='Удалить', callback_data=f"event_delete_{event_id}"),
         InlineKeyboardButton(text='Назад', callback_data=f"backMain"),
 
-        width=3
+        width=2
     ).as_markup()
     
 

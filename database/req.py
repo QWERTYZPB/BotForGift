@@ -407,6 +407,20 @@ async def get_event(event_id: int) -> Optional[Event]:
     except SQLAlchemyError as e:
         print(f"Error getting event: {e}")
         return None
+    
+
+async def delete_event(event_id: int) -> None:
+    try:
+        async with async_session() as session:
+            result = await session.execute(
+                delete(Event)
+                .where(Event.id == event_id)
+            )
+        return None
+    except SQLAlchemyError as e:
+        print(f"Error getting event: {e}")
+        return None
+    
 
 async def update_event_status(event_id: int, is_active: bool) -> Optional[Event]:
     try:
