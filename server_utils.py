@@ -140,7 +140,8 @@ async def get_json_event_time(eventId: int):
             "days": 0,
             "hours": 0,
             "minutes": 0,
-            "seconds": date.seconds
+            "seconds": date.seconds,
+            "users_to_invite":event.ref_tickets_count
             
         }
 

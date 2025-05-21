@@ -1080,7 +1080,7 @@ async def set_win_count(message: types.Message, state: FSMContext):
         await state.update_data(win_count=int(message.text))
         
         await message.answer(
-            'Введите дату окончания розыгрыша (ДД.ММ.ГГГГ ЧЧ:ММ):',
+            f'Введите дату окончания розыгрыша (ДД.ММ.ГГГГ ЧЧ:ММ):\n\nАктуальное время в боте: {datetime.now().strftime("%d.%m.%Y %H:%M")}',
             reply_markup=user_kb.back_to_menu()
         )
         await state.set_state(UserStates.AddEvent.end_date)
@@ -1137,7 +1137,7 @@ async def set_end_date(message: types.Message, state: FSMContext):
         await state.clear()
         
     except ValueError:
-        await message.answer('❌ Неверный формат даты или дата в прошлом! Используйте формат ДД.ММ.ГГГГ ЧЧ:ММ')
+        await message.answer(f'❌ Неверный формат даты или дата в прошлом! Используйте формат ДД.ММ.ГГГГ ЧЧ:ММ по MSK\n\nАктуальное время в боте: {datetime.now().strftime("%d.%m.%Y %H:%M")}')
 
 
 
