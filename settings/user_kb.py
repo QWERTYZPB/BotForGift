@@ -225,6 +225,10 @@ def back_to_event(event_id):
 
 
 
+def skip_referral_system():
+    return InlineKeyboardBuilder().row(
+        InlineKeyboardButton(text='Пропустить', callback_data=f'ReferralSkip')
+    ).as_markup()
 
 
 

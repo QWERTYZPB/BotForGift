@@ -1039,26 +1039,40 @@ async def set_description(message: types.Message, state: FSMContext):
     await state.update_data(description=message.text)
     
     await message.answer(
+        'Использовать реферальную систему? Если да, то введите кол-во тикетов за приглашенного пользователя:',
+        reply_markup=user_kb.back_to_menu()
+    )
+    await state.set_state(UserStates.AddEvent.tickets_for_ref_count)
+
+
+
+@router.message(UserStates.AddEvent.tickets_for_ref_count)
+async def set_channels(message: types.Message, state: FSMContext):
+    try:
+        # Проверяем корректность ввода ID каналов
+        count_ref_tickets = int(message.text)
+
+        await state.update_data(ref_tickets_count=count_ref_tickets)
+        
+        await message.answer(
+            'Введите количество победителей:',
+            reply_markup=user_kb.back_to_menu()
+        )
+        await state.set_state(UserStates.AddEvent.win_count)
+        
+    except ValueError:
+        await message.answer('❌ Ошибка! Введите числовое значение')
+
+@router.callback_query(F.data == 'ReferralSkip')
+async def set_channels(message: types.Message, state: FSMContext):
+      
+    await message.edit_text(
         'Введите количество победителей:',
         reply_markup=user_kb.back_to_menu()
     )
     await state.set_state(UserStates.AddEvent.win_count)
 
-# @router.message(UserStates.AddEvent.channel_event_ids)
-# async def set_channels(message: types.Message, state: FSMContext):
-#     try:
-#         # Проверяем корректность ввода ID каналов
-#         channels = [int(ch_id.strip()) for ch_id in message.text.split(',')]
-#         await state.update_data(channel_event_ids=channels)
-        
-#         await message.answer(
-#             'Введите количество победителей:',
-#             reply_markup=user_kb.back_to_menu()
-#         )
-#         await state.set_state(UserStates.AddEvent.win_count)
-        
-#     except ValueError:
-#         await message.answer('❌ Ошибка! Введите числовые ID каналов через запятую')
+
 
 @router.message(UserStates.AddEvent.win_count)
 async def set_win_count(message: types.Message, state: FSMContext):
