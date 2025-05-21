@@ -123,76 +123,77 @@ class Scheduler:
         for event in events:
             if event.tickets_event:
                 if datetime.datetime.now() > event.end_date and event.is_active:
-                    
-                    tickets_winners = await make_raffle(event)
+                    if event.message_ids:
+                        
+                        tickets_winners = await make_raffle(event)
 
-                    if event.user_event_ids:
-                        user_count = len(event.user_event_ids.split(','))
-                    else:
-                        user_count = 0
-
-                    win_count = None
-                    raffle_data = None
-                
-                    if event.user_event_ids:
-                        user_count = len(event.user_event_ids.split(','))
-                    
-                    win_count = event.win_count
-                    raffle_data = event.end_date.strftime("%d.%m.%Y, %H:%M")
-
-                    
-                    
-                    winners = await req.get_event_winners(event.id)
-
-                    text_winners = '\n'.join([f"    {i}. {winner.fullname}" for i, winner in enumerate(winners, start=1)])
-                    text_for_owner_winners = '\n'.join([f'''<a href="{'https://t.me/'+winner.username if winner.username else 'tg://user?id='+str(winner.user_id)}">    {winner.fullname}</a>''' for winner in winners])
-                    
-                    deeplink_url = 'https://t.me/' + (await bot.get_me()).username + f'?startapp=' + utils.encode_data(f'event_id={event.id}&mode=results')
-
-
-                    for data in event.message_ids.split(','):
-                        channel_id, message_id = data.split(':')
-                        if event.media:
-                            await bot.edit_message_caption(
-                                message_id=message_id,
-                                chat_id=channel_id,
-                                caption=lexicon.EVENT_WIN_TEXT.format(
-                                    name=event.name,
-                                    winners=text_winners,
-                                    users_count=user_count,
-                                    win_count=win_count,
-                                    raffle_date=raffle_data
-                                ),
-                                reply_markup= user_kb.show_event_results_web_kb(url=deeplink_url)
-                            )
+                        if event.user_event_ids:
+                            user_count = len(event.user_event_ids.split(','))
                         else:
-                            await bot.edit_message_text(
-                                chat_id=channel_id,
-                                message_id=message_id,
-                                text=lexicon.EVENT_WIN_TEXT.format(
-                                    name=event.name,
-                                    winners=text_winners,
-                                    users_count=user_count,
-                                    win_count=win_count,
-                                    raffle_date=raffle_data
-                                ),
-                                reply_markup= user_kb.show_event_results_web_kb(url=deeplink_url)
-                            )
-                    await bot.send_message(
-                        chat_id=event.owner_id,
-                        text="Ваш розыгрыш завершен!\n\n" + lexicon.EVENT_WIN_TEXT.format(
-                            name=event.name,
-                            winners=text_for_owner_winners,
-                            users_count=user_count,
-                            win_count=win_count,
-                            raffle_date=raffle_data
-                        ),
-                        reply_markup=user_kb.show_event_results_web_kb(url=deeplink_url)
-                    )
-                    await req.update_event(
-                        event_id=event.id,
-                        is_active=False
-                    )
+                            user_count = 0
+
+                        win_count = None
+                        raffle_data = None
+                    
+                        if event.user_event_ids:
+                            user_count = len(event.user_event_ids.split(','))
+                        
+                        win_count = event.win_count
+                        raffle_data = event.end_date.strftime("%d.%m.%Y, %H:%M")
+
+                        
+                        
+                        winners = await req.get_event_winners(event.id)
+
+                        text_winners = '\n'.join([f"    {i}. {winner.fullname}" for i, winner in enumerate(winners, start=1)])
+                        text_for_owner_winners = '\n'.join([f'''<a href="{'https://t.me/'+winner.username if winner.username else 'tg://user?id='+str(winner.user_id)}">    {winner.fullname}</a>''' for winner in winners])
+                        
+                        deeplink_url = 'https://t.me/' + (await bot.get_me()).username + f'?startapp=' + utils.encode_data(f'event_id={event.id}&mode=results')
+
+
+                        for data in event.message_ids.split(','):
+                            channel_id, message_id = data.split(':')
+                            if event.media:
+                                await bot.edit_message_caption(
+                                    message_id=message_id,
+                                    chat_id=channel_id,
+                                    caption=lexicon.EVENT_WIN_TEXT.format(
+                                        name=event.name,
+                                        winners=text_winners,
+                                        users_count=user_count,
+                                        win_count=win_count,
+                                        raffle_date=raffle_data
+                                    ),
+                                    reply_markup= user_kb.show_event_results_web_kb(url=deeplink_url)
+                                )
+                            else:
+                                await bot.edit_message_text(
+                                    chat_id=channel_id,
+                                    message_id=message_id,
+                                    text=lexicon.EVENT_WIN_TEXT.format(
+                                        name=event.name,
+                                        winners=text_winners,
+                                        users_count=user_count,
+                                        win_count=win_count,
+                                        raffle_date=raffle_data
+                                    ),
+                                    reply_markup= user_kb.show_event_results_web_kb(url=deeplink_url)
+                                )
+                        await bot.send_message(
+                            chat_id=event.owner_id,
+                            text="Ваш розыгрыш завершен!\n\n" + lexicon.EVENT_WIN_TEXT.format(
+                                name=event.name,
+                                winners=text_for_owner_winners,
+                                users_count=user_count,
+                                win_count=win_count,
+                                raffle_date=raffle_data
+                            ),
+                            reply_markup=user_kb.show_event_results_web_kb(url=deeplink_url)
+                        )
+                        await req.update_event(
+                            event_id=event.id,
+                            is_active=False
+                        )
                         
             
     
