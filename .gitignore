@@ -2,6 +2,7 @@
 TASK
 venv/*
 venv-bot/*
-__pycache__/*
+*__pycache__/
+error.txt
 database/db.sqlite3
 t.py
