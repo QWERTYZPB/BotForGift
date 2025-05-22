@@ -1052,6 +1052,8 @@ async def confirm_del_channel(cb: types.CallbackQuery):
 
     user_channels_ids = user.channel_ids.split(',')
     for channel_id in user_channels_ids:
+        lg.info(f'channel_id: {channel_id}')
+        
         if channel_id == str(channel.id):
             user_channels_ids.remove(str(channel.id))
             return
