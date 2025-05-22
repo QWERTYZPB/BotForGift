@@ -124,55 +124,6 @@ async def start_bot(message: types.Message, command: CommandObject, state: FSMCo
             pass
 
 
-        try: 
-            event_id = int(command.args)
-
-            event = await req.get_event(event_id)
-
-            if event.use_captcha:
-                await state.update_data(event_id =event_id)
-                await utils.send_captcha_2user(message=message, bot=message.bot)
-                return
-        
-
-            user_count = 0
-            win_count = None
-            raffle_data = None
-
-            if event.user_event_ids:
-                user_count = len(event.user_event_ids.split(','))
-            
-            win_count = event.win_count
-            raffle_data = event.end_date.strftime("%d.%m.%Y, %H:%M")
-
-            if event.media:
-                await message.answer_photo(
-                    photo=event.media,
-                    caption=lexicon.EVENT_TEXT.format(
-                    name=event.name,
-                    description=event.description or '',
-                    users_count=user_count,
-                    win_count=win_count,
-                    raffle_date=raffle_data
-                    ),
-                    reply_markup= user_kb.show_private_chat_web_app(event.id, event.end_date)
-                )
-            else:
-                await message.answer(
-                    text=lexicon.EVENT_TEXT.format(
-                    name=event.name,
-                    description=event.description or '',
-                    users_count=user_count,
-                    win_count=win_count,
-                    raffle_date=raffle_data
-                    ),
-                    reply_markup= user_kb.show_private_chat_web_app(event.id, event.end_date)
-                )
-
-            
-        except Exception as e:
-            lg.error(f"ERROR WHILE PARSING EVENT: {e}")
-        
         return
     try:
         await add_user(
@@ -336,77 +287,77 @@ async def user_event(cb: types.CallbackQuery):
 
 
 
-@router.callback_query(F.data=='Change_Captcha')
-async def change_captcha(cb: types.CallbackQuery, bot: config.Bot):
-    await cb.answer('')
+# @router.callback_query(F.data=='Change_Captcha')
+# async def change_captcha(cb: types.CallbackQuery, bot: config.Bot):
+#     await cb.answer('')
     
-    try:await bot.delete_message(chat_id=cb.message.chat.id, message_id=cb.message.message_id)
-    except: pass
+#     try:await bot.delete_message(chat_id=cb.message.chat.id, message_id=cb.message.message_id)
+#     except: pass
 
-    await utils.send_captcha_2user(cb, bot)
+#     await utils.send_captcha_2user(cb, bot)
     
     
     
-@router.callback_query(F.data.startswith('Captcha_'))
-async def captcha_true(cb: types.CallbackQuery, bot: config.Bot, state: FSMContext):
-    ans = cb.data.split('_')[-1]
-    if ans == "True":
-        data = await state.get_data()
-        if 'event_id' not in data.keys():
-            await cb.message.answer('Данные устарели, попробуйте заново', 
-                                    reply_markup=user_kb.back_to_menu())
-            await state.clear()
-            return
-        await bot.delete_message(chat_id=cb.message.chat.id, message_id=cb.message.message_id)
-        await cb.answer('')
-        await cb.message.answer('Капча пройдена успешно!')
+# @router.callback_query(F.data.startswith('Captcha_'))
+# async def captcha_true(cb: types.CallbackQuery, bot: config.Bot, state: FSMContext):
+#     ans = cb.data.split('_')[-1]
+#     if ans == "True":
+#         data = await state.get_data()
+#         if 'event_id' not in data.keys():
+#             await cb.message.answer('Данные устарели, попробуйте заново', 
+#                                     reply_markup=user_kb.back_to_menu())
+#             await state.clear()
+#             return
+#         await bot.delete_message(chat_id=cb.message.chat.id, message_id=cb.message.message_id)
+#         await cb.answer('')
+#         await cb.message.answer('Капча пройдена успешно!')
         
-        event_id = int(data['event_id'])
+#         event_id = int(data['event_id'])
 
-        event = await req.get_event(event_id)
+#         event = await req.get_event(event_id)
     
-        user_count = 0
-        win_count = None
-        raffle_data = None
+#         user_count = 0
+#         win_count = None
+#         raffle_data = None
 
-        if event.user_event_ids:
-            user_count = len(event.user_event_ids.split(','))
+#         if event.user_event_ids:
+#             user_count = len(event.user_event_ids.split(','))
         
-        win_count = event.win_count
-        raffle_data = event.end_date.strftime("%d.%m.%Y, %H:%M")
+#         win_count = event.win_count
+#         raffle_data = event.end_date.strftime("%d.%m.%Y, %H:%M")
 
-        if event.media:
-            await cb.message.answer_photo(
-                photo=event.media,
-                caption=lexicon.EVENT_TEXT.format(
-                name=event.name,
-                description=event.description or '',
-                users_count=user_count,
-                win_count=win_count,
-                raffle_date=raffle_data
-                ),
-                reply_markup= user_kb.show_private_chat_web_app(event.id, event.end_date)
-            )
-        else:
-            await cb.message.answer(
-                text=lexicon.EVENT_TEXT.format(
-                name=event.name,
-                description=event.description or '',
-                users_count=user_count,
-                win_count=win_count,
-                raffle_date=raffle_data
-                ),
-                reply_markup= user_kb.show_private_chat_web_app(event.id, event.end_date)
-            )
+#         if event.media:
+#             await cb.message.answer_photo(
+#                 photo=event.media,
+#                 caption=lexicon.EVENT_TEXT.format(
+#                 name=event.name,
+#                 description=event.description or '',
+#                 users_count=user_count,
+#                 win_count=win_count,
+#                 raffle_date=raffle_data
+#                 ),
+#                 reply_markup= user_kb.show_private_chat_web_app(event.id, event.end_date)
+#             )
+#         else:
+#             await cb.message.answer(
+#                 text=lexicon.EVENT_TEXT.format(
+#                 name=event.name,
+#                 description=event.description or '',
+#                 users_count=user_count,
+#                 win_count=win_count,
+#                 raffle_date=raffle_data
+#                 ),
+#                 reply_markup= user_kb.show_private_chat_web_app(event.id, event.end_date)
+#             )
     
 
         
-    else:
-        await bot.delete_message(chat_id=cb.message.chat.id, message_id=cb.message.message_id)
-        await cb.answer('')
-        await cb.message.answer('Капча НЕ пройдена!')
+#     else:
+#         await bot.delete_message(chat_id=cb.message.chat.id, message_id=cb.message.message_id)
+#         await cb.answer('')
+#         await cb.message.answer('Капча НЕ пройдена!')
 
-        await utils.send_captcha_2user(cb, bot)
+#         await utils.send_captcha_2user(cb, bot)
 
 
 

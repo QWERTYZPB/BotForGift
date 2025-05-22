@@ -2,7 +2,6 @@ import random
 import base64
 from PIL import Image, ImageDraw, ImageFont
 from aiogram import types, Bot
-from settings import user_kb
 
 from io import BytesIO
 
@@ -87,21 +86,3 @@ def encode_data(string: str) -> str:
 
 
 
-async def send_captcha_2user(message: types.Message | types.CallbackQuery, bot: Bot):
-    captcha_img, captcha_str = await generate_captcha()
-
-    buffer = BytesIO()
-    captcha_img.save(buffer, format='PNG')
-    buffer.seek(0)
-
-    input_file = types.BufferedInputFile(buffer.read(), filename='image.png')
-    if isinstance(message, types.Message):
-        await bot.send_photo(photo=input_file, 
-                            chat_id=message.from_user.id,
-                            caption='❌ Пройдите капчу!',
-                            reply_markup=await user_kb.create_captcha_kb(captcha_str))
-    else:
-        await bot.send_photo(photo=input_file, 
-                            chat_id=message.message.chat.id,
-                            caption='❌ Пройдите капчу!',
-                            reply_markup=await user_kb.create_captcha_kb(captcha_str))
