@@ -69,7 +69,7 @@ async def start_bot(message: types.Message, command: CommandObject, state: FSMCo
                         c+=1
 
             if not c == len(event_channels):
-                await message.answer('Вы не подписанны на все каналы! Подпишитесь и снова перейдите по реферальной сслыке', reply_markup= user_kb.show_private_chat_web_app(event_id, event.end_date))
+                await message.answer('Вы не подписанны на все каналы! Подпишитесь и снова перейдите по реферальной сслыке', reply_markup= user_kb.show_private_chat_web_app(event.id, event.end_date))
                 return
             
             if referrer.referrals:
