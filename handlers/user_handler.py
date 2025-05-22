@@ -1036,8 +1036,10 @@ async def select_channel(cb: types.CallbackQuery):
 
 
 
-@router.callback_query(F.data.startswith('confirm_ChannelDel_'))
+@router.callback_query(F.data.startswith('ChannelDelConf_'))
 async def confirm_del_channel(cb: types.CallbackQuery):
+
+    lg.info(f'TRYING TO DEL CHANNEL: {cb.data.split('_')[-1]}')
 
     channel = await req.get_channel(int(cb.data.split('_')[-1]))
     
