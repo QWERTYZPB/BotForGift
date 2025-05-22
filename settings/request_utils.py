@@ -2,9 +2,6 @@ import requests
 import base64
 from typing import Optional, Tuple
 
-from settings.utils import bytes_to_data_url
-
-
 
 
 def check_subscription(user_id: int, channel_id: str, bot_token: str) -> bool:

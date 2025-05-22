@@ -3,7 +3,7 @@ import base64
 from PIL import Image, ImageDraw, ImageFont
 from aiogram import types, Bot
 
-from io import BytesIO
+import io
 
 
 
@@ -66,6 +66,17 @@ def bytes_to_data_url(image_bytes: bytes, mime_type: str = "image/jpeg") -> str:
     """
     encoded = base64.b64encode(image_bytes).decode("utf-8")
     return f"data:{mime_type};base64,{encoded}"
+
+
+
+def pillow_image_to_data_url(img):
+    buffered = io.BytesIO()
+    img.save(buffered, format="JPEG")
+    return 'data:image/jpeg;base64,' + base64.b64encode(buffered.getvalue()).decode("utf-8")
+
+
+def base64_string_to_pillow_image(base64_str):
+    return Image.open(io.BytesIO(base64.decodebytes(bytes(base64_str, "utf-8"))))
 
 
 def encode_data(string: str) -> str:

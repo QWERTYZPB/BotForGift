@@ -213,7 +213,7 @@ async def get_captcha_json():
     
     asnwers = wrong2
     
-    image_data = utils.bytes_to_data_url(captcha_img.tobytes())
+    image_data = utils.pillow_image_to_data_url(captcha_img.tobitmap())
 
     return {
         "image": image_data,
