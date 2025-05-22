@@ -97,7 +97,7 @@ async def get_event(eventId):
 
 
 @app.route(APP_PREFIX+'/captcha', methods=["GET"])
-async def get_captcha(eventId):
+async def get_captcha():
     return await server_utils.get_captcha_json()
 
 
