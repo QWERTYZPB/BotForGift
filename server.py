@@ -93,7 +93,7 @@ async def get_event(eventId):
     
     eventId = int(eventId)
 
-    return await server_utils.get_json_event_time(eventId)
+    return await server_utils.get_json_event(eventId)
 
 
 @app.route(APP_PREFIX+'/captcha', methods=["GET"])
