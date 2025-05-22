@@ -1034,11 +1034,6 @@ async def select_channel(cb: types.CallbackQuery):
 
 
 
-@router.callback_query(F.data.startswith('decline_ChannelDel'))
-async def confirm_del_channel(cb: types.CallbackQuery):
-    await cb.message.answer('Отмена удаления, успешно!', reply_markup=user_kb.back_to_menu())
-
-
 
 
 @router.callback_query(F.data.startswith('confirm_ChannelDel_'))

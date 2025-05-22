@@ -231,7 +231,7 @@ async def select_channel_delete(user: req.User):
 
 def confirm_del_channel(channel_id):
     return InlineKeyboardBuilder().row(
-        InlineKeyboardButton(text='✅ Да', callback_data=f'confirm_ChannelDel_{channel_id}'),
+        InlineKeyboardButton(text='✅ Да', callback_data=f'ChannelDel_{channel_id}'),
         InlineKeyboardButton(text='❌ Нет', callback_data=f'decline_ChannelDel'),
     ).as_markup()
 
