@@ -79,7 +79,7 @@ async def get_tickets(userId, eventId):
 
 
 @app.route(APP_PREFIX+'/getEventDate/<eventId>', methods=["GET"])
-async def get_event(eventId):
+async def get_event_date(eventId):
     
     eventId = int(eventId)
 
