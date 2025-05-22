@@ -6,6 +6,12 @@ from settings import user_kb
 
 from io import BytesIO
 
+
+
+
+
+
+
 default_color_red = 228
 default_color_green = 150
 default_color_blue = 150
@@ -51,6 +57,16 @@ async def generate_captcha():
     return (captcha_image, captcha_string)  # return a heterogeneous tuple
 
 
+
+def bytes_to_data_url(image_bytes: bytes, mime_type: str = "image/jpeg") -> str:
+    """
+    Конвертирует байты изображения в Data URL
+    :param image_bytes: Бинарные данные изображения
+    :param mime_type: MIME-тип изображения (например, image/jpeg, image/png)
+    :return: Data URL строка
+    """
+    encoded = base64.b64encode(image_bytes).decode("utf-8")
+    return f"data:{mime_type};base64,{encoded}"
 
 
 def encode_data(string: str) -> str:

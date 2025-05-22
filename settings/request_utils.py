@@ -2,18 +2,9 @@ import requests
 import base64
 from typing import Optional, Tuple
 
+from settings.utils import bytes_to_data_url
 
 
-
-def bytes_to_data_url(image_bytes: bytes, mime_type: str = "image/jpeg") -> str:
-    """
-    Конвертирует байты изображения в Data URL
-    :param image_bytes: Бинарные данные изображения
-    :param mime_type: MIME-тип изображения (например, image/jpeg, image/png)
-    :return: Data URL строка
-    """
-    encoded = base64.b64encode(image_bytes).decode("utf-8")
-    return f"data:{mime_type};base64,{encoded}"
 
 
 def check_subscription(user_id: int, channel_id: str, bot_token: str) -> bool:

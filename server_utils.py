@@ -6,7 +6,7 @@ from typing import List
 
 from database import req
 from database.models import Ticket, Channel
-from settings import request_utils
+from settings import request_utils, utils
 
 import config
 
@@ -147,6 +147,16 @@ async def get_json_event_time(eventId: int):
 
 
 
+async def get_json_event(eventId: int):
+    print(eventId)
+    event = await req.get_event(int(eventId))
+    
+    return { 
+        "users_to_invite":event.ref_tickets_count,
+        "use_captcha": event.use_captcha
+        }
+
+
 async def get_json_event_winners(eventId: int):
     print(eventId)
     event_winners = await req.get_event_winners(int(eventId))
@@ -192,6 +202,24 @@ async def get_json_user(userId, event_id):
         "referralLink": f"{config.BOT_URL}?start={userId}-{event_id}", # t.me/<bot_username>?start=<parameter>
         "tickets": await _get_tickets(user=user, event=event)
         }
+
+
+
+
+async def get_captcha_json():
+    captcha_img, captcha_ans = await utils.generate_captcha()
+    wrong2 = [await utils.generate_random_string(5) for _ in (0,1)]
+    wrong2.append(captcha_ans)
+    
+    asnwers = wrong2
+    
+    image_data = utils.bytes_to_data_url(captcha_img.tobytes())
+
+    return {
+        "image": image_data,
+        "answers": asnwers,
+        "right": captcha_ans
+    }
 
 
 

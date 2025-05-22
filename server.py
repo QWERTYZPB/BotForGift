@@ -78,12 +78,27 @@ async def get_tickets(userId, eventId):
     return await server_utils.get_json_user_tickets(userId, eventId)
 
 
+@app.route(APP_PREFIX+'/getEventDate/<eventId>', methods=["GET"])
+async def get_event(eventId):
+    
+    eventId = int(eventId)
+
+    return await server_utils.get_json_event_time(eventId)
+
+
+
+
 @app.route(APP_PREFIX+'/getEvent/<eventId>', methods=["GET"])
 async def get_event(eventId):
     
     eventId = int(eventId)
 
     return await server_utils.get_json_event_time(eventId)
+
+
+@app.route(APP_PREFIX+'/captcha', methods=["GET"])
+async def get_captcha(eventId):
+    return await server_utils.get_captcha_json()
 
 
 
