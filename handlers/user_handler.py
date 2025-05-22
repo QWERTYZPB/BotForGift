@@ -204,7 +204,7 @@ async def backmain(cb: types.CallbackQuery, state: FSMContext):
     except: pass
     
     try:
-        await cb.message.answer(
+        await cb.message.edit_text(
             lexicon.START_TEXT, 
             reply_markup=user_kb.main_reply()
         )
