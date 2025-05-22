@@ -71,7 +71,7 @@ def bytes_to_data_url(image_bytes: bytes, mime_type: str = "image/jpeg") -> str:
 
 def pillow_image_to_data_url(img):
     buffered = io.BytesIO()
-    img.save(buffered, format="JPEG")
+    img.save(buffered, format="PNG")
     return 'data:image/jpeg;base64,' + base64.b64encode(buffered.getvalue()).decode("utf-8")
 
 
