@@ -199,7 +199,7 @@ async def get_json_user(userId, event_id):
 async def get_json_event_channels(eventId):
     event = await req.get_event(eventId)
 
-    channels_event = []
+    channels_event: list[req.Channel] = []
 
 
     for channel_id in event.channel_event_ids.split(','):
@@ -210,17 +210,18 @@ async def get_json_event_channels(eventId):
 
     for channel in channels_event:
         if channel.is_active:
-            channels.append(
-                {
-                    "id": channel.id,
-                    "name": channel.name,
-                    "url": channel.url,
-                    "isSubscribed": False # here will be another function
-                }
-            )
+                channels.append(
+                    {
+                        "channelId": channel.id,
+                        "image_data": "",
+                        "channelName": channel.name,
+                        "channelUrl": channel.url,
+                        "isSubscribed": True
+                    }
+                )
 
     return {
-        "data": channels
+        "channels": channels
         }
 
 

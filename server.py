@@ -19,12 +19,12 @@ async def get_test_message():
     return {"ok": True}
 
 
-@app.route(APP_PREFIX+'/channels/<userId>')
-async def get_channels(userId):
+@app.route(APP_PREFIX+'/channels/<eventId>')
+async def get_channels(eventId):
 
-    userId = int(userId)
-    
-    return await server_utils.get_json_event_channels(userId)
+    eventId = int(eventId)
+
+    return await server_utils.get_json_event_channels(eventId)
 
 
 @app.route(APP_PREFIX+'/UpdateUser', methods=["POST"])
