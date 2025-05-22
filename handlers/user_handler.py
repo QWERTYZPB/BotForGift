@@ -1061,6 +1061,10 @@ async def confirm_del_channel(cb: types.CallbackQuery):
         channel_ids=','.join(user_channels_ids)
     )
 
+
+    lg.info(f'user updated?: {cb.from_user.id}')
+
+
     for event in await req.get_events():
         if event.channel_event_ids:
         
@@ -1076,7 +1080,8 @@ async def confirm_del_channel(cb: types.CallbackQuery):
                 event_id=event.id,
                 channel_event_ids = ','.join(event_channels)
             )
-            
+    lg.info(f'events updated?')
+    
     try:
         await cb.message.edit_text(
             text=f'Успешно удалено', 
