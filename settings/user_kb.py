@@ -24,11 +24,13 @@ def main_reply():
             [
                 KeyboardButton(text='Розыгрыши'),
                 KeyboardButton(text='Новый розыгрыш'),
-                # KeyboardButton(text='Подписки')
             ],
             [
                 KeyboardButton(text='Добавить группу', request_chat=KeyboardButtonRequestChat(request_id=1, chat_is_channel=False)),
                 KeyboardButton(text='Добавить Канал', request_chat=KeyboardButtonRequestChat(request_id=2, chat_is_channel=True))
+            ],
+            [
+                KeyboardButton(text='Удалить Канал|Группу')
             ]
         ],
         resize_keyboard=True,
@@ -207,6 +209,31 @@ def show_private_chat_web_app(event_id, event_end_date: datetime.datetime):
         ]
     )
 
+
+
+
+
+async def select_channel_delete(user: req.User):
+    btns = []
+
+    for channel_id in user.channel_ids.split(','):
+        if channel_id != '':
+            channel = await req.get_channel(int(channel_id)) 
+            btns.append(InlineKeyboardButton(text=channel.name, callback_data=f'ChannelDelete_{channel_id}'))
+
+    btns.append(InlineKeyboardButton(text='Назад', callback_data=f'backMain'))
+
+    return InlineKeyboardBuilder().row(
+        *btns,
+        width=2
+    ).as_markup()
+
+
+def confirm_del_channel(channel_id):
+    return InlineKeyboardBuilder().row(
+        InlineKeyboardButton(text='✅ Да', callback_data=f'confirm_ChannelDel_{channel_id}'),
+        InlineKeyboardButton(text='❌ Нет', callback_data=f'decline_ChannelDel'),
+    ).as_markup()
 
 
 def confirm_send(event_id):

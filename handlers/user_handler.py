@@ -1003,10 +1003,78 @@ async def handle_chat_selection(message: types.Message, bot: config.Bot):
 
 
 
+"""  Channel DELETE  """
 
 
 
 
+@router.message(F.text == 'Удалить Канал|Группу')
+async def delete_channel(message: types.Message):
+    user = await req.get_user(message.from_user.id)
+    
+    if not user.channel_ids:
+        await message.answer('У вас нет каналов, добавьте их')
+        return
+
+    await message.answer(
+        text='Выбери канал для удаления:', 
+        reply_markup= await user_kb.select_channel_delete(user)
+        )
+
+
+@router.callback_query(F.data.startswith('ChannelDelete_'))
+async def select_channel(cb: types.CallbackQuery):
+    channel = await req.get_channel(int(cb.data.split('_')[-1]))
+
+    await cb.message.edit_text(
+        text=f'Выбран: {channel.name}\n\nУдалить?', 
+        reply_markup=user_kb.confirm_del_channel(channel_id=channel.id)
+    )
+
+
+@router.callback_query(F.data.startswith('confirm_ChannelDel_'))
+async def confirm_del_channel(cb: types.CallbackQuery):
+
+    channel = await req.get_channel(int(cb.data.split('_')[-1]))
+    if not channel:
+        await cb.message.answer('Нет такого канала, ошибка.')
+        return
+    
+
+    user = await req.get_user(cb.from_user.id)
+
+    user_channels_ids = user.channel_ids.split(',')
+    for channel_id in user_channels_ids:
+        if channel_id == str(channel.id):
+            user_channels_ids.remove(str(channel.id))
+            return
+        
+    await req.update_user(
+        user_id=user.user_id,
+        channel_ids=','.join(user_channels_ids)
+    )
+
+    for event in await req.get_events():
+        if event.channel_event_ids:
+        
+            event_channels = event.channel_event_ids.split(',')
+
+            for channel_event_id in event_channels:
+                if channel_event_id != '':
+                    if channel_event_id == str(channel.id):
+                        event_channels.remove(str(channel.id))
+                        return
+            
+            await req.update_event(
+                event_id=event.id,
+                channel_event_ids = ','.join(event_channels)
+            )
+            
+
+    await cb.message.edit_text(
+        text=f'Успешно удалено', 
+        reply_markup=user_kb.back_to_menu()
+    )
 
 
 
