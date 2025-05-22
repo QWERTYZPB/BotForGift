@@ -1039,8 +1039,6 @@ async def select_channel(cb: types.CallbackQuery):
 @router.callback_query(F.data.startswith('ChannelDelConf_'))
 async def confirm_del_channel(cb: types.CallbackQuery):
 
-    lg.info(f'TRYING TO DEL CHANNEL: {cb.data.split('_')[-1]}')
-
     channel = await req.get_channel(int(cb.data.split('_')[-1]))
     
     if not channel:
@@ -1056,15 +1054,12 @@ async def confirm_del_channel(cb: types.CallbackQuery):
         
         if channel_id == str(channel.id):
             user_channels_ids.remove(str(channel.id))
-            return
+            break
         
     await req.update_user(
         user_id=user.user_id,
         channel_ids=','.join(user_channels_ids)
     )
-
-
-    lg.info(f'user updated?: {cb.from_user.id}')
 
 
     for event in await req.get_events():
@@ -1076,14 +1071,12 @@ async def confirm_del_channel(cb: types.CallbackQuery):
                 if channel_event_id != '':
                     if channel_event_id == str(channel.id):
                         event_channels.remove(str(channel.id))
-                        return
+                        break
             
             await req.update_event(
                 event_id=event.id,
                 channel_event_ids = ','.join(event_channels)
             )
-    lg.info(f'events updated?')
-    
     try:
         await cb.message.edit_text(
             text=f'Успешно удалено', 
