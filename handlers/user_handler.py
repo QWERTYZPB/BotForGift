@@ -203,7 +203,13 @@ async def backmain(cb: types.CallbackQuery, state: FSMContext):
     try: await state.clear()
     except: pass
     
-    await cb.message.answer(
+    try:
+        await cb.message.answer(
+            lexicon.START_TEXT, 
+            reply_markup=user_kb.main_reply()
+        )
+    except:
+        await cb.message.answer(
             lexicon.START_TEXT, 
             reply_markup=user_kb.main_reply()
         )
