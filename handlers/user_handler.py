@@ -1032,10 +1032,20 @@ async def select_channel(cb: types.CallbackQuery):
     )
 
 
+
+
+@router.callback_query(F.data.startswith('decline_ChannelDel'))
+async def confirm_del_channel(cb: types.CallbackQuery):
+    await cb.message.answer('Отмена удаления, успешно!', reply_markup=user_kb.back_to_menu())
+
+
+
+
 @router.callback_query(F.data.startswith('confirm_ChannelDel_'))
 async def confirm_del_channel(cb: types.CallbackQuery):
 
     channel = await req.get_channel(int(cb.data.split('_')[-1]))
+    
     if not channel:
         await cb.message.answer('Нет такого канала, ошибка.')
         return
@@ -1070,12 +1080,17 @@ async def confirm_del_channel(cb: types.CallbackQuery):
                 channel_event_ids = ','.join(event_channels)
             )
             
-
-    await cb.message.edit_text(
-        text=f'Успешно удалено', 
-        reply_markup=user_kb.back_to_menu()
-    )
-
+    try:
+        await cb.message.edit_text(
+            text=f'Успешно удалено', 
+            reply_markup=user_kb.back_to_menu()
+        )
+                
+    except:
+        await cb.message.answer(
+            text=f'Успешно удалено', 
+            reply_markup=user_kb.back_to_menu()
+        )
 
 
 
