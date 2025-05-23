@@ -103,14 +103,19 @@ async def _get_tickets(user: req.User, event: req.Event):
         if not ticket_id == '':
             try:
                 ticket = await req.get_ticket(int(ticket_id))
+
                 if ticket.event_id == event.id:
                     tickets.append({
                         "id": ticket.id,
                         "number": ticket.number,
                         "createdAt": ticket.created_at.strftime("%d.%m.%Y, %H:%M")
                         })
-            except:
-                pass
+            except Exception as e:
+                
+                return {
+                    'ok': False,
+                    'err': str(e)
+                }
         
     return tickets
 
