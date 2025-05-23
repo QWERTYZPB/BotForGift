@@ -198,8 +198,8 @@ class Scheduler:
             
     
     async def start_scheduler(self, bot: config.Bot):
-        self.scheduler.add_job(self.check_end_date, 'interval', minutes=20, args=(bot,))
-        self.scheduler.add_job(self.update_posts, 'cron', hour="*", args=(bot,))
+        self.scheduler.add_job(self.check_end_date, 'cron', minute="*", args=(bot,))
+        self.scheduler.add_job(self.update_posts, 'interval', minutes=10, args=(bot,))
         self.scheduler.start()
 
 
