@@ -83,24 +83,25 @@ async def start_bot(message: types.Message, command: CommandObject, state: FSMCo
                     referrals=str(message.from_user.id) 
                 )
 
-            ticket1 = await req.generate_ticket_number(user_id=int(referrer_id), event_id=int(eventId))
-            # ticket2 = await req.generate_ticket_number(user_id=int(referrer_id), event_id=int(eventId))
+            if event.ref_tickets_count > 0:
+                for i in range(event.ref_tickets_count):
+                    ticket1 = await req.generate_ticket_number(user_id=int(referrer_id), event_id=int(eventId))
 
-            if not event.tickets_event:
-                event.tickets_event = ''
-            
-            if not referrer.tickets_ids:
-                referrer.tickets_ids = ''
+                    if not event.tickets_event:
+                        event.tickets_event = ''
+                    
+                    if not referrer.tickets_ids:
+                        referrer.tickets_ids = ''
 
-            await req.update_event(
-                event_id=int(eventId),
-                tickets_event=event.tickets_event+str(ticket1)+',' # +str(ticket2.id)+','
-            )
+                    await req.update_event(
+                        event_id=int(eventId),
+                        tickets_event=event.tickets_event+str(ticket1)+',' # +str(ticket2.id)+','
+                    )
 
-            await req.update_user(
-                user_id=referrer.user_id, 
-                tickets_ids=referrer.tickets_ids+str(ticket1)+',' # +str(ticket2.id)+','
-                )
+                    await req.update_user(
+                        user_id=referrer.user_id, 
+                        tickets_ids=referrer.tickets_ids+str(ticket1)+',' # +str(ticket2.id)+','
+                        )
 
             await add_user(
                 user_id=message.from_user.id,
@@ -111,7 +112,7 @@ async def start_bot(message: types.Message, command: CommandObject, state: FSMCo
 
 
 
-            await message.bot.send_message(chat_id=referrer_id, text=f'Вы получили 2 тикета за приглашенного пользователя на событие: {event.name} !')
+            await message.bot.send_message(chat_id=referrer_id, text=f'Вы получили {event.ref_tickets_count} тикета за приглашенного пользователя на событие: {event.name} !')
 
             await message.answer(
                 lexicon.START_TEXT, 
