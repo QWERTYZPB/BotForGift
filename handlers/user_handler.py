@@ -46,9 +46,9 @@ async def start_bot(message: types.Message, command: CommandObject, state: FSMCo
             pre_users_referrers_ids = [i.referrals for i in await req.get_users() if i.referrals]
             
             for user_referrers_ids in pre_users_referrers_ids:
-                for referrer_id in user_referrers_ids.split(','):
-                    if referrer_id!='':
-                        users_referrers_ids.append(referrer_id)
+                for user_referrer_id in user_referrers_ids.split(','):
+                    if user_referrer_id!='':
+                        users_referrers_ids.append(user_referrer_id)
 
 
             if referrer.referrals:
@@ -64,8 +64,8 @@ async def start_bot(message: types.Message, command: CommandObject, state: FSMCo
             
             for channel_id in event_channels:
                 if channel_id != '':
-                    res = request_utils.check_subscription(int(referrer_id), int(channel_id), config.BOT_TOKEN)
-                    lg.info(f'{int(referrer_id), channel_id, config.BOT_TOKEN, res}')
+                    res = request_utils.check_subscription(int(message.from_user.id), int(channel_id), config.BOT_TOKEN)
+                    lg.info(f'{int(message.from_user.id), channel_id, config.BOT_TOKEN, res}')
                     if res:
                         c+=1
             lg.info(f"CHECK CHANNEL REF {c}, {len(event_channels)}")
