@@ -119,7 +119,7 @@ async def show_event_kb(event_id: int, use_captha: bool = False, is_active: bool
         InlineKeyboardButton(text='Каналы', callback_data=f'edit_event_channels_{event_id}'),
         InlineKeyboardButton(text='Дата', callback_data=f'edit_event_date_{event_id}'),
 
-        InlineKeyboardButton(text='Отправить розыгрыш', callback_data=f"send_{event_id}"),
+        InlineKeyboardButton(text='Запустить розыгрыш', callback_data=f"send_{event_id}"),
         InlineKeyboardButton(text='Капча ✅', callback_data=f"captcha_disable_{event_id}") if use_captha else \
         InlineKeyboardButton(text='Капча ❌', callback_data=f"captcha_enable_{event_id}"),
 

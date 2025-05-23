@@ -985,10 +985,17 @@ async def delete_channel(message: types.Message):
 async def select_channel(cb: types.CallbackQuery):
     channel = await req.get_channel(int(cb.data.split('_')[-1]))
 
-    await cb.message.edit_text(
-        text=f'Выбран: {channel.name}\n\nУдалить?', 
-        reply_markup=user_kb.confirm_del_channel(channel_id=channel.id)
-    )
+    try:
+
+        await cb.message.edit_text(
+            text=f'Выбран: {channel.name}\n\nУдалить?', 
+            reply_markup=user_kb.confirm_del_channel(channel_id=channel.id)
+        )
+    except:
+        await cb.message.answer(
+            text=f'Выбран: {channel.name}\n\nУдалить?', 
+            reply_markup=user_kb.confirm_del_channel(channel_id=channel.id)
+        )
 
 
 
@@ -1078,7 +1085,7 @@ async def set_description(message: types.Message, state: FSMContext):
     await state.update_data(description=message.text)
     
     await message.answer(
-        'Использовать реферальную систему? Если да, то введите кол-во тикетов за приглашенного пользователя:',
+        'Использовать реферальную систему?\nВведите кол-во тикетов за приглашенного пользователя:\n\n<b>Введите 0 чтобы не использовать реф. систему</b>',
         reply_markup=user_kb.back_to_menu()
     )
     await state.set_state(UserStates.AddEvent.tickets_for_ref_count)
@@ -1119,7 +1126,7 @@ async def set_win_count(message: types.Message, state: FSMContext):
         await state.update_data(win_count=int(message.text))
         
         await message.answer(
-            f'Введите дату окончания розыгрыша (ДД.ММ.ГГГГ ЧЧ:ММ):\n\nАктуальное время в боте: {datetime.now().strftime("%d.%m.%Y %H:%M")}',
+            f'Введите дату окончания розыгрыша (ДД.ММ.ГГГГ ЧЧ:ММ):\n\nАктуальное время в боте: {datetime.now().strftime("%d.%m.%Y %H:%M")} MSK',
             reply_markup=user_kb.back_to_menu()
         )
         await state.set_state(UserStates.AddEvent.end_date)
@@ -1190,7 +1197,13 @@ async def handler_event_ation(cb: types.CallbackQuery):
 
 
     if action == 'delete':
-        await cb.message.edit_text(
+        try:
+            await cb.message.edit_text(
+            text='Вы действительно хотите <b>УДАЛИТЬ</b> ваш розыгрыш?',
+            reply_markup=user_kb.confirm_delete_event(event_id)
+            )
+        except:
+            await cb.message.answer(
             text='Вы действительно хотите <b>УДАЛИТЬ</b> ваш розыгрыш?',
             reply_markup=user_kb.confirm_delete_event(event_id)
         )
