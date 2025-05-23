@@ -64,7 +64,7 @@ async def start_bot(message: types.Message, command: CommandObject, state: FSMCo
             
             for channel_id in event_channels:
                 if channel_id != '':
-                    res = request_utils.check_subscription(int(referrer_id), channel_id, config.BOT_TOKEN)
+                    res = request_utils.check_subscription(int(referrer_id), int(channel_id), config.BOT_TOKEN)
                     lg.info(f'{int(referrer_id), channel_id, config.BOT_TOKEN, res}')
                     if res:
                         c+=1
