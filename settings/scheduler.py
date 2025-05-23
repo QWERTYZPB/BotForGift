@@ -20,7 +20,7 @@ async def make_raffle(event: req.Event):
         return
     
 
-    event_tickets = [await req.get_ticket(int(ticket)) for ticket in event.tickets_event.split(',') if ticket!='']
+    event_tickets = [await req.get_ticket(int(ticket)) for ticket in event.tickets_event.split(',') if ticket.isdigit()]
 
     slave_tickets = [ticket for ticket in event_tickets if not ticket.is_winner]
 

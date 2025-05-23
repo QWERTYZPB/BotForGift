@@ -96,12 +96,12 @@ async def start_bot(message: types.Message, command: CommandObject, state: FSMCo
 
                     await req.update_event(
                         event_id=int(eventId),
-                        tickets_event=event.tickets_event+str(ticket1)+',' # +str(ticket2.id)+','
+                        tickets_event=event.tickets_event+str(ticket1.id)+',' # +str(ticket2.id)+','
                     )
 
                     await req.update_user(
-                        user_id=referrer.user_id, 
-                        tickets_ids=referrer.tickets_ids+str(ticket1)+',' # +str(ticket2.id)+','
+                        user_id=referrer.user_id,
+                        tickets_ids=referrer.tickets_ids+str(ticket1.id)+',' # +str(ticket2.id)+','
                         )
 
             await add_user(
