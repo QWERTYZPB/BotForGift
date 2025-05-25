@@ -100,7 +100,7 @@ async def _get_tickets(user: req.User, event: req.Event):
     tickets = []
     user_tickets = user.tickets_ids.split(',') if user.tickets_ids else []
     for ticket_id in user_tickets:
-        if not ticket_id == '':
+        if not ticket_id == '' and ticket_id.isdigit():
             try:
                 ticket = await req.get_ticket(int(ticket_id))
 
@@ -111,11 +111,11 @@ async def _get_tickets(user: req.User, event: req.Event):
                         "createdAt": ticket.created_at.strftime("%d.%m.%Y, %H:%M")
                         })
             except Exception as e:
-                
-                return {
-                    'ok': False,
-                    'err': str(e)
-                }
+               pass 
+                # return {
+                #     'ok': False,
+                #     'err': str(e)
+                # }
         
     return tickets
 
