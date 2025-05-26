@@ -111,6 +111,7 @@ async def _get_tickets(user: req.User, event: req.Event):
                         "createdAt": ticket.created_at.strftime("%d.%m.%Y, %H:%M")
                         })
             except Exception as e:
+               
                pass 
                 # return {
                 #     'ok': False,
