@@ -785,6 +785,10 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
     event_id = cb.data.split('_')[-1]
 
     event = await req.get_event(int(event_id))
+
+    if not event:
+        await cb.message.answer('Розыгрыш не был найден, попробуйте еще раз',reply_marukup=user_kb.back_to_menu())
+        return
     
     if event.message_ids:
         for data in event.message_ids.split(','):
