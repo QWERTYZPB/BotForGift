@@ -42,22 +42,29 @@ async def updateUserData():
     user_id = data['user_id']
 
     try:
-        await req.add_user(
+        user = await req.add_user(
             user_id=int(user_id),
             username=username,
             fullname=fullname
         )
     except:
-        await req.update_user(
+        user = await req.update_user(
             user_id=int(user_id),
             username=username,
             fullname=fullname
         )
 
 
-
-    return quart.jsonify({"ok": True}), 200
-
+    try:
+        return quart.jsonify({
+            "ok": True,
+            "user":user.fullname
+            }), 200
+    except:
+        return quart.jsonify({
+            "ok": False,
+            "user_id":user_id
+            }), 200
 
 
 
