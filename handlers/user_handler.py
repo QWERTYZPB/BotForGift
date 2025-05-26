@@ -1154,7 +1154,8 @@ async def set_end_date(message: types.Message, state: FSMContext):
             win_count=data['win_count'],
             owner_id=message.from_user.id,
             description=data['description'],
-            end_date = date_obj
+            end_date = date_obj,
+            ref_tickets_count=data['ref_tickets_count']
         )
 
         if not event:
