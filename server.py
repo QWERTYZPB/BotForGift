@@ -27,6 +27,87 @@ async def get_channels(eventId):
     return await server_utils.get_json_event_channels(eventId)
 
 
+@app.route(APP_PREFIX+'/MakeReferral', methods=['POST'])
+async def make_referral():
+    data = await quart.request.get_json()
+
+
+    required_fields = {'event_id', 'referrer_id', 'referral_id'}
+    if not required_fields.issubset(data):
+        return quart.jsonify({"ok":False, "message": "Missing required fields"}), 400
+
+    event_id = data['event_id']
+    referrer_id = data['referrer_id']
+    referral_id = int(data['referral_id'])
+
+
+
+    referrer = await req.get_user(int(referrer_id))
+
+    if referrer_id == str(referral_id):
+        return  {'ok' : False, 'message':'Вы не можете пригласить самого себя!'}, 200
+    
+    users_referrers_ids=[]
+    pre_users_referrers_ids = [i.referrals for i in await req.get_users() if i.referrals]
+    
+    for user_referrers_ids in pre_users_referrers_ids:
+        for user_referrer_id in user_referrers_ids.split(','):
+            if user_referrer_id!='':
+                users_referrers_ids.append(user_referrer_id)
+
+
+    if referrer.referrals:
+        if str(referral_id) in users_referrers_ids:
+            return {'ok' : False, 'message':'Вы уже были приглашены пользователем!'}, 200
+    
+    event = await req.get_event(int(event_id)) 
+    
+    
+    if referrer.referrals:
+        await req.update_user(
+            user_id=int(referrer_id),
+            referrals=referrer.referrals + ',' + str(referral_id) 
+        )
+    else:
+        await req.update_user(
+            user_id=int(referrer_id),
+            referrals=str(referral_id) 
+        )
+
+    if event.ref_tickets_count > 0:
+        for i in range(event.ref_tickets_count):
+            ticket1 = await req.generate_ticket_number(user_id=int(referrer_id), event_id=int(event_id))
+
+            if not event.tickets_event:
+                event.tickets_event = ''
+            
+            if not referrer.tickets_ids:
+                referrer.tickets_ids = ''
+
+            await req.update_event(
+                event_id=int(event_id),
+                tickets_event=event.tickets_event+str(ticket1.id)+','
+            )
+
+            await req.update_user(
+                user_id=referrer.user_id,
+                tickets_ids=referrer.tickets_ids+str(ticket1.id)+','
+                )
+
+    try:
+        await req.add_user(
+            user_id=referral_id,
+            referrer=referrer.user_id
+        )
+    except:
+        await req.update_user(
+            user_id=referral_id,
+            referrer=referrer.user_id
+        )
+
+    return {'ok' : True, 'message':f'Спасибо, что перешли по реферальной ссылке, вашему рефереру было отправлено {event.ref_tickets_count} тикетов!'}, 200
+
+
 @app.route(APP_PREFIX+'/UpdateUser', methods=["POST"])
 async def updateUserData():
 
