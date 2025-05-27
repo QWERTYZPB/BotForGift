@@ -208,7 +208,8 @@ async def get_json_user(userId, event_id):
 
     return {
         "id": user.user_id,
-        "referralLink": f"{config.BOT_URL}?start={userId}-{event_id}", # t.me/<bot_username>?start=<parameter>
+        "referralLink": config.BOT_URL + f'?startapp='+utils.encode_data(f'event_id={event.id}&mode=ref&referrer_id={userId}'),
+        # "referralLink": f"{config.BOT_URL}?start={userId}-{event_id}", # t.me/<bot_username>?start=<parameter>
         "tickets": await _get_tickets(user=user, event=event)
         }
 
