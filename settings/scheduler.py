@@ -146,7 +146,7 @@ class Scheduler:
                         winners = await req.get_event_winners(event.id)
 
                         text_winners = '\n'.join([f"    {i}. {winner.fullname}" for i, winner in enumerate(winners, start=1)])
-                        text_for_owner_winners = '\n'.join([f'''<a href="{'https://t.me/'+winner.username if winner.username else 'tg://user?id='+str(winner.user_id)}">    {winner.fullname}</a>''' for winner in winners])
+                        text_for_owner_winners = '\n'.join([f'''    {j}. <a href="{'https://t.me/'+winner.username if winner.username else 'tg://user?id='+str(winner.user_id)}">    {winner.fullname}</a>''' for j, winner in enumerate(winners, start=1)])
                         
                         deeplink_url = 'https://t.me/' + (await bot.get_me()).username + f'?startapp=' + utils.encode_data(f'event_id={event.id}&mode=results')
 
