@@ -631,6 +631,8 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
 
     
     for channel_id in event.channel_event_ids.split(','):
+        
+        event = await req.get_event(int(event_id))
 
         user_count = 0
         win_count = None
@@ -672,14 +674,13 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
                 reply_markup= user_kb.show_event_web_kb(url=webapp_url)
             )
         if msg:
-            event_message_ids = ''
-            if not event.message_ids:
+            event_message_ids = event.message_ids
+            if not event.message_ids or event.message_ids  == '':
                 event_message_ids = channel_id+":"+str(msg.message_id)
-            elif not event.message_ids  == '' :
-                event_message_ids += channel_id+":"+str(msg.message_id)
             else:
                 event_message_ids = ','.join(list(set(event_message_ids.split(',').append(channel_id+":"+str(msg.message_id)))))
-
+            
+            lg.info(f"EVENT {event.id}, MESSAGES = {event_message_ids}")
             await req.update_event(
                 event_id=int(event_id),
                 message_ids=event_message_ids
