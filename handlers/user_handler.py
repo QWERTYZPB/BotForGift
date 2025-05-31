@@ -628,6 +628,10 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
     if not event.channel_event_ids or event.channel_event_ids == '':
         await cb.message.answer('Нету активных каналов!', reply_markup=user_kb.back_to_event(event_id))
         return
+    
+
+
+    message_idss = []
 
     
     for channel_id in event.channel_event_ids.split(','):
@@ -674,20 +678,32 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
                 reply_markup= user_kb.show_event_web_kb(url=webapp_url)
             )
         if msg:
-            event_message_ids = event.message_ids
-            if not event.message_ids or event.message_ids  == '':
-                event_message_ids = channel_id+":"+str(msg.message_id)
-            else:
-                try:
-                    if event_message_ids:
-                        event_message_ids = ','.join(list(set(event_message_ids.split(',').append(channel_id+":"+str(msg.message_id)))))
-                except:
-                    lg.error(f"EVENT {event.id}, MESSAGES = {event_message_ids}, MESSAGE = {msg.message_id}, CHANNEL = {channel_id}")
-            lg.info(f"EVENT {event.id}, MESSAGES = {event_message_ids}")
-            await req.update_event(
-                event_id=int(event_id),
-                message_ids=event_message_ids
+
+            message_idss.append(
+                {'channel_id': channel_id, 'msg_id': str(msg.message_id)}
             )
+            # event_message_ids = event.message_ids
+            # if not event.message_ids or event.message_ids  == '':
+            #     event_message_ids = channel_id+":"+str(msg.message_id)
+            # else:
+            #     try:
+            #         if event_message_ids:
+            #             event_message_ids = ','.join(list(set(event_message_ids.split(',').append(channel_id+":"+str(msg.message_id)))))
+            #     except:
+            #         lg.error(f"EVENT {event.id}, MESSAGES = {event_message_ids}, MESSAGE = {msg.message_id}, CHANNEL = {channel_id}")
+            lg.info(f"EVENT {event.id}, MESSAGES = {message_idss}")
+    
+    
+    event_messages_ids = []
+    for item in message_idss:
+        event_messages_ids.append(item['channel_id'] + ":" + item['msg_id'])
+
+    event_messages_ids = list(set(event_messages_ids))
+    
+    await req.update_event(
+        event_id=int(event_id),
+        message_ids=','.join(event_messages_ids)
+    )
 
     await cb.message.edit_text('Успешно разослано по всем каналам!', reply_markup=user_kb.back_to_event(event_id))
 
