@@ -678,8 +678,11 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
             if not event.message_ids or event.message_ids  == '':
                 event_message_ids = channel_id+":"+str(msg.message_id)
             else:
-                event_message_ids = ','.join(list(set(event_message_ids.split(',').append(channel_id+":"+str(msg.message_id)))))
-            
+                try:
+                    if event_message_ids:
+                        event_message_ids = ','.join(list(set(event_message_ids.split(',').append(channel_id+":"+str(msg.message_id)))))
+                except:
+                    lg.error(f"EVENT {event.id}, MESSAGES = {event_message_ids}, MESSAGE = {msg.message_id}, CHANNEL = {channel_id}")
             lg.info(f"EVENT {event.id}, MESSAGES = {event_message_ids}")
             await req.update_event(
                 event_id=int(event_id),
