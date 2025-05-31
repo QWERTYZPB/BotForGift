@@ -77,24 +77,29 @@ async def make_referral():
         )
 
     if event.ref_tickets_count > 0:
+        tickets = []
         for i in range(event.ref_tickets_count):
             ticket1 = await req.generate_ticket_number(user_id=int(referrer_id), event_id=int(event_id))
+            tickets.append(ticket1.id)
+    
+    
+    event_tickets_event = [] if not event.tickets_event else event.tickets_event.split(',')
 
-            if not event.tickets_event:
-                event.tickets_event = ''
-            
-            if not referrer.tickets_ids:
-                referrer.tickets_ids = ''
+    event_tickets_event.extend(tickets)
 
-            await req.update_event(
-                event_id=int(event_id),
-                tickets_event=event.tickets_event+str(ticket1.id)+','
-            )
+    referrer_tickets_ids = [] if not referrer.tickets_ids else referrer.tickets_ids.split(',')
 
-            await req.update_user(
-                user_id=referrer.user_id,
-                tickets_ids=referrer.tickets_ids+str(ticket1.id)+','
-                )
+    referrer_tickets_ids.extend(tickets)
+
+    await req.update_event(
+        event_id=int(event_id),
+        tickets_event=','.join(event_tickets_event)
+    )
+
+    await req.update_user(
+        user_id=referrer.user_id,
+        tickets_ids=','.join(referrer_tickets_ids)
+        )
 
     try:
         await req.add_user(
