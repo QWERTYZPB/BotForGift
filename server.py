@@ -59,8 +59,8 @@ async def make_referral():
 
     if event.user_event_ids:
         referrer_referals = referrer.referrals.split(',') if referrer.referrals else [] 
-        if str(referral_id) in event.user_event_ids.split(',') or \
-             str(referral_id) in referrer_referals:
+
+        if str(referral_id) in event.user_event_ids.split(','):
             return {'ok' : False, 'message':'Вы уже были приглашены или уже учавствуете!'}, 200
     
     
