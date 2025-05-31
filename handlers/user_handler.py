@@ -699,7 +699,7 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
         event_messages_ids.append(item['channel_id'] + ":" + item['msg_id'])
 
     event_messages_ids = list(set(event_messages_ids))
-    
+
     await req.update_event(
         event_id=int(event_id),
         message_ids=','.join(event_messages_ids)
@@ -731,7 +731,12 @@ async def confirm_sending(cb: types.CallbackQuery, bot: config.Bot):
             except:
                 pass
 
-    await req.delete_event(int(event_id))
+    # await req.delete_event(int(event_id))
+    await req.update_event(
+        event_id=event.id,
+        deleted = True,
+        is_active = False
+    )
     user = await req.get_user(cb.from_user.id)
     
     # rm event id from channels

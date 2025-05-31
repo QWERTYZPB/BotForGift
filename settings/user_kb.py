@@ -62,12 +62,13 @@ async def create_user_raffles(events: List[str]):
         try:
             event = await req.get_event(int(id))
             if event:
-                btns.append(
-                    InlineKeyboardButton(
-                        text=event.name,
-                        callback_data=f'user_event_show_{event.id}'
+                if not event.deleted:
+                    btns.append(
+                        InlineKeyboardButton(
+                            text=event.name,
+                            callback_data=f'user_event_show_{event.id}'
+                        )
                     )
-                )
 
         except:
             pass

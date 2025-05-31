@@ -83,6 +83,7 @@ class Event(Base):
     end_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    deleted: Mapped[bool] = mapped_column(Boolean, default=False)
     use_captcha: Mapped[bool] = mapped_column(Boolean, default=True)
     user_event_ids: Mapped[str] = mapped_column(String, nullable=True)
     
