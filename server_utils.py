@@ -35,7 +35,7 @@ async def get_json_subscriptions(bot: Bot, user_tg_id: int, channels: List[Chann
                         )
                 if image:
                     if len(image) == 2:
-                        image = request_utils.bytes_to_data_url(image[0])
+                        image = utils.bytes_to_data_url(image[0])
                     else:
                         image = '/friends.webp'
                 else:
