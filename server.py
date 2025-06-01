@@ -79,7 +79,7 @@ async def make_referral():
         tickets = []
         for i in range(event.ref_tickets_count):
             ticket1 = await req.generate_ticket_number(user_id=int(referrer_id), event_id=int(event_id))
-            tickets.append(ticket1.id)
+            tickets.append(str(ticket1.id))
     
     
     event_tickets_event = [] if not event.tickets_event else event.tickets_event.split(',')
