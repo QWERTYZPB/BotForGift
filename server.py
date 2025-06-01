@@ -58,9 +58,8 @@ async def make_referral():
     event = await req.get_event(int(event_id)) 
 
     if event.user_event_ids:
-        referrer_referals = referrer.referrals.split(',') if referrer.referrals else [] 
 
-        if str(referral_id) in event.user_event_ids.split(','):
+        if str(referral_id) in event.user_event_ids.split(',') and str(referral_id) in user_referrers_ids:
             return {'ok' : False, 'message':'Вы уже были приглашены или уже учавствуете!'}, 200
     
     
