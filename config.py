@@ -24,5 +24,5 @@ HOST_URL = env('HOST_URL')
 
 
 
-bot=Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode='html'))
+bot=Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode='html', link_preview_is_disabled=True))
 dp=Dispatcher()
